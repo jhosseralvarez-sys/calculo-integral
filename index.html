@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cálculo Integral Interactivo - UTP 2026-II</title>
+    
+    <!-- KaTeX para fórmulas matemáticas -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body);"></script>
+    
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        body { background: linear-gradient(135deg, #1e3c72, #2a5298); color: white; min-height: 100vh; padding: 20px; }
+        header { text-align: center; padding: 30px 0; }
+        header h1 { font-size: 2.5em; margin-bottom: 10px; }
+        header p { font-size: 1.2em; opacity: 0.9; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; max-width: 1200px; margin: 30px auto; padding: 0 20px; }
+        .card { background: rgba(255,255,255,0.1); border-radius: 15px; padding: 25px; text-align: center; transition: transform 0.3s, background 0.3s; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2); }
+        .card:hover { transform: translateY(-5px); background: rgba(255,255,255,0.2); }
+        .card h3 { font-size: 1.3em; margin-bottom: 10px; }
+        .card p { font-size: 0.9em; margin-bottom: 15px; opacity: 0.8; }
+        .card a { display: inline-block; padding: 10px 20px; background: #ffd700; color: #1e3c72; text-decoration: none; border-radius: 25px; font-weight: bold; }
+        .card a:hover { background: #fff; }
+        .fase { font-size: 0.75em; padding: 4px 10px; border-radius: 10px; display: inline-block; margin-bottom: 10px; }
+        .fase1 { background: #4CAF50; }
+        .fase2 { background: #FF9800; }
+        .fase3 { background: #F44336; }
+        footer { text-align: center; padding: 30px; opacity: 0.7; }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>🧮 Cálculo Integral Interactivo</h1>
+        <p>Universidad Tecnológica de Pereira — 2026-II</p>
+        <p style="margin-top:10px; font-size:0.9em;">Plataforma colaborativa de visualización matemática</p>
+    </header>
+
+    <div class="grid">
+        <!-- FASE 1 - Módulos desarrollados -->
+        <div class="card">
+            <span class="fase fase1">Fase 1 ✅</span>
+            <h3>1. Sumas de Riemann</h3>
+            <p>Aproximación del área con rectángulos</p>
+            <a href="modulo1-riemann/index.html">Entrar</a>
+        </div>
+
+        <div class="card">
+            <span class="fase fase1">Fase 1 ✅</span>
+            <h3>2. Regla del Trapecio</h3>
+            <p>Aproximación con trapecios</p>
+            <a href="modulo2-trapecio/index.html">Entrar</a>
+        </div>
+
+        <div class="card">
+            <span class="fase fase1">Fase 1 ✅</span>
+            <h3>3. Regla del Punto Medio</h3>
+            <p>Rectángulos desde el punto medio</p>
+            <a href="modulo3-punto-medio/index.html">Entrar</a>
+        </div>
+
+        <div class="card">
+            <span class="fase fase1">Fase 1 ✅</span>
+            <h3>4. Regla de Simpson</h3>
+            <p>Aproximación con parábolas</p>
+            <a href="modulo4-simpson/index.html">Entrar</a>
+        </div>
+
+        <div class="card">
+            <span class="fase fase1">Fase 1 ✅</span>
+            <h3>5. Área bajo la Curva</h3>
+            <p>Integral definida y Teorema Fundamental</p>
+            <a href="modulo5-area/index.html">Entrar</a>
+        </div>
+
+        <div class="card">
+            <span class="fase fase1">Fase 1 ✅</span>
+            <h3>6. Integración Directa</h3>
+            <p>Antiderivadas básicas</p>
+            <a href="modulo6-directa/index.html">Entrar</a>
+        </div>
+
+        <!-- FASE 2 - Próximamente -->
+        <div class="card">
+            <span class="fase fase2">Fase 2 🔜</span>
+            <h3>7. Sustitución</h3>
+            <p>Cambio de variable en potencias</p>
+            <a href="modulo7-sustitucion/index.html">Ver</a>
+        </div>
+
+        <div class="card">
+            <span class="fase fase2">Fase 2 🔜</span>
+            <h3>8. Exponenciales</h3>
+            <p>Integrales con \(e^x\)</p>
+            <a href="modulo8-exponenciales/index.html">Ver</a>
+        </div>
+
+        <div class="card">
+            <span class="fase fase2">Fase 2 🔜</span>
+            <h3>9. Logarítmicas</h3>
+            <p>Integrales que dan ln|x|</p>
+            <a href="modulo9-logaritmicas/index.html">Ver</a>
+        </div>
+
+        <div class="card">
+            <span class="fase fase2">Fase 2 🔜</span>
+            <h3>10. Trigonométricas</h3>
+            <p>sen, cos, tan y más</p>
+            <a href="modulo10-trigonometricas/index.html">Ver</a>
+        </div>
+
+        <!-- FASE 3 - Próximamente -->
+        <div class="card">
+            <span class="fase fase3">Fase 3 🔜</span>
+            <h3>11. Trig. Inversas</h3>
+            <p>arcsen, arctan</p>
+            <a href="modulo11-trig-inversas/index.html">Ver</a>
+        </div>
+
+        <div class="card">
+            <span class="fase fase3">Fase 3 🔜</span>
+            <h3>12. Hiperbólicas Inversas</h3>
+            <p>arcsinh, arcosh</p>
+            <a href="modulo12-hiperbolicas/index.html">Ver</a>
+        </div>
+
+        <div class="card">
+            <span class="fase fase3">Fase 3 🔜</span>
+            <h3>13. Trinomio ax²+bx+c</h3>
+            <p>Completar el cuadrado</p>
+            <a href="modulo13-trinomio/index.html">Ver</a>
+        </div>
+
+        <div class="card">
+            <span class="fase fase3">Fase 3 🔜</span>
+            <h3>14. Integración por Partes</h3>
+            <p>Regla LIATE</p>
+            <a href="modulo14-partes/index.html">Ver</a>
+        </div>
+    </div>
+
+    <footer>
+        <p>Proyecto colaborativo · Tecnología en Desarrollo de Software · UTP</p>
+    </footer>
+</body>
+</html>
