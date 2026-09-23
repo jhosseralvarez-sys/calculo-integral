@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Módulo 4: Regla de Simpson</title>
+    <!-- KaTeX CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+    <!-- Plotly.js -->
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0c2461, #1e3799);
+            color: white;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-top: 20px;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .back-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 30px;
+            text-decoration: none;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .back-button:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: translateY(-2px);
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+        }
+
+        h2 {
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            color: #a3d2ff;
+        }
+
+        h3 {
+            font-size: 1.4rem;
+            margin: 20px 0 15px;
+            color: #d1e8ff;
+        }
+
+        p {
+            margin-bottom: 15px;
+            line-height: 1.6;
+        }
+
+        .formula {
+            font-size: 1.2rem;
+            text-align: center;
+            margin: 20px 0;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+        }
+
+        .warning {
+            background: rgba(255, 152, 0, 0.2);
+            border: 1px solid rgba(255, 152, 0, 0.5);
+            border-radius: 10px;
+            padding: 15px;
+            margin: 15px 0;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .interactive-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        #graph-container {
+            width: 100%;
+            height: 500px;
+            margin-bottom: 20px;
+        }
+
+        .slider-container {
+            width: 100%;
+            max-width: 600px;
+            margin: 20px 0;
+        }
+
+        .slider-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 8px;
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.2);
+            outline: none;
+        }
+
+        .stats-container {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 20px;
+            width: 100%;
+        }
+
+        .stat-card {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            padding: 15px;
+            flex: 1;
+            min-width: 200px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #a3d2ff;
+            margin-top: 5px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+            background: rgba(0, 0, 0, 0.1);
+        }
+
+        th, td {
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 10px;
+            text-align: center;
+        }
+
+        th {
+            background: rgba(0, 0, 0, 0.3);
+        }
+
+        .coeficiente-4 {
+            background-color: rgba(76, 175, 80, 0.3);
+        }
+
+        .coeficiente-2 {
+            background-color: rgba(255, 152, 0, 0.3);
+        }
+
+        @media (max-width: 768px) {
+            .stats-container {
+                flex-direction: column;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            h2 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <a href="../index.html" class="back-button">← Volver al menú</a>
+
+    <div class="container">
+        <header>
+            <h1>Módulo 4: Regla de Simpson</h1>
+        </header>
+
+        <!-- SECCIÓN 1: Teoría y Justificación Geométrica -->
+        <div class="card">
+            <h2>Teoría y Justificación Geométrica</h2>
+            <p>La Regla de Simpson, desarrollada por Thomas Simpson en el siglo XVIII, es un método numérico para aproximar integrales definidas. A diferencia de los métodos del trapecio o del punto medio que utilizan segmentos rectilíneos para aproximar la curva, la Regla de Simpson utiliza arcos de parábolas.</p>
+            
+            <p>Este enfoque le da mayor precisión al método, especialmente cuando se trabaja con funciones suaves, ya que las parábolas pueden ajustarse mejor a la forma de la curva original. La Regla de Simpson es exacta para polinomios de grado 3 o menor.</p>
+            
+            <div class="formula">
+                \( S_n = \frac{\Delta x}{3} \left[ f(x_0) + 4\sum f(x_{impar}) + 2\sum f(x_{par}) + f(x_n) \right] \)
+            </div>
+            
+            <div class="warning">
+                ¡IMPORTANTE! El número de subintervalos "n" SIEMPRE debe ser un número PAR.
+            </div>
+        </div>
+
+        <!-- SECCIÓN 2: Laboratorio Interactivo -->
+        <div class="card">
+            <h2>Laboratorio Interactivo</h2>
+            <div class="interactive-section">
+                <div id="graph-container"></div>
+                
+                <div class="slider-container">
+                    <div class="slider-label">
+                        <span>Número de subintervalos (n):</span>
+                        <span id="n-value">4</span>
+                    </div>
+                    <input type="range" id="n-slider" min="2" max="50" step="2" value="4">
+                </div>
+                
+                <div class="stats-container">
+                    <div class="stat-card">
+                        <div>Aproximación Simpson</div>
+                        <div id="approximation" class="stat-value">0.0000</div>
+                    </div>
+                    <div class="stat-card">
+                        <div>Valor Exacto</div>
+                        <div id="exact" class="stat-value">2.6667</div>
+                    </div>
+                    <div class="stat-card">
+                        <div>Error Absoluto</div>
+                        <div id="error" class="stat-value">0.0000</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECCIÓN 3: Ejemplos Resueltos Paso a Paso -->
+        <div class="card">
+            <h2>Ejemplos Resueltos Paso a Paso</h2>
+            
+            <h3>Ejemplo 1: Aproximar ∫₀² x² dx usando la Regla de Simpson con n=4</h3>
+            <p>Función: f(x) = x², Intervalo: [0, 2], n = 4 (par como debe ser)</p>
+            <p>Δx = (2 - 0)/4 = 0.5</p>
+            
+            <table>
+                <thead>
+                    <tr>
+                        <th>i</th>
+                        <th>x_i</th>
+                        <th>f(x_i)</th>
+                        <th>Coeficiente</th>
+                        <th>Producto</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>0</td>
+                        <td>0.0</td>
+                        <td>0.0000</td>
+                        <td>1</td>
+                        <td>0.0000</td>
+                    </tr>
+                    <tr class="coeficiente-4">
+                        <td>1</td>
+                        <td>0.5</td>
+                        <td>0.2500</td>
+                        <td>4</td>
+                        <td>1.0000</td>
+                    </tr>
+                    <tr class="coeficiente-2">
+                        <td>2</td>
+                        <td>1.0</td>
+                        <td>1.0000</td>
+                        <td>2</td>
+                        <td>2.0000</td>
+                    </tr>
+                    <tr class="coeficiente-4">
+                        <td>3</td>
+                        <td>1.5</td>
+                        <td>2.2500</td>
+                        <td>4</td>
+                        <td>9.0000</td>
+                    </tr>
+                    <tr>
+                        <td>4</td>
+                        <td>2.0</td>
+                        <td>4.0000</td>
+                        <td>1</td>
+                        <td>4.0000</td>
+                    </tr>
+                    <tr style="background: rgba(0,0,0,0.3);">
+                        <td colspan="4">Suma total:</td>
+                        <td>16.0000</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <p>S₄ = (0.5/3) × 16.0000 = 8/3 ≈ 2.6667</p>
+            <p>Como f(x) = x² es un polinomio de grado 2, la Regla de Simpson da el valor exacto.</p>
+            
+            <h3>Ejemplo 2: Aproximar ∫₁³ (1/x) dx usando S₄</h3>
+            <p>Función: f(x) = 1/x, Intervalo: [1, 3], n = 4</p>
+            <p>Δx = (3 - 1)/4 = 0.5</p>
+            
+            <table>
+                <thead>
+                    <tr>
+                        <th>i</th>
+                        <th>x_i</th>
+                        <th>f(x_i)</th>
+                        <th>Coeficiente</th>
+                        <th>Producto</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>0</td>
+                        <td>1.0</td>
+                        <td>1.0000</td>
+                        <td>1</td>
+                        <td>1.0000</td>
+                    </tr>
+                    <tr class="coeficiente-4">
+                        <td>1</td>
+                        <td>1.5</td>
+                        <td>0.6667</td>
+                        <td>4</td>
+                        <td>2.6667</td>
+                    </tr>
+                    <tr class="coeficiente-2">
+                        <td>2</td>
+                        <td>2.0</td>
+                        <td>0.5000</td>
+                        <td>2</td>
+                        <td>1.0000</td>
+                    </tr>
+                    <tr class="coeficiente-4">
+                        <td>3</td>
+                        <td>2.5</td>
+                        <td>0.4000</td>
+                        <td>4</td>
+                        <td>1.6000</td>
+                    </tr>
+                    <tr>
+                        <td>4</td>
+                        <td>3.0</td>
+                        <td>0.3333</td>
+                        <td>1</td>
+                        <td>0.3333</td>
+                    </tr>
+                    <tr style="background: rgba(0,0,0,0.3);">
+                        <td colspan="4">Suma total:</td>
+                        <td>6.6000</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <p>Aplicando la fórmula: \( S_4 = \frac{0.5}{3} \times 6.6000 = 1.1000 \)</p>
+            <p>El valor exacto es ln(3) ≈ 1.0986, por lo que el error es muy pequeño.</p>
+        </div>
+    </div>
+
+    <!-- KaTeX JS -->
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"></script>
+    
+    <script>
+        // Renderizado automático de fórmulas KaTeX
+        document.addEventListener("DOMContentLoaded", function() {
+            renderMathInElement(document.body, {
+                delimiters: [
+                    {left: "\\(", right: "\\)", display: false},
+                    {left: "\\[", right: "\\]", display: true}
+                ]
+            });
+        });
+
+        // Función para calcular la Regla de Simpson
+        function simpsonRule(func, a, b, n) {
+            const dx = (b - a) / n;
+            let sum = func(a) + func(b); // Extremos con coeficiente 1
+            
+            for (let i = 1; i < n; i++) {
+                const x = a + i * dx;
+                if (i % 2 === 0) {
+                    sum += 2 * func(x); // Coeficiente 2 para pares
+                } else {
+                    sum += 4 * func(x); // Coeficiente 4 para impares
+                }
+            }
+            
+            return (dx / 3) * sum;
+        }
+
+        // Función para generar puntos de la parábola entre tres puntos
+        function getParabolaPoints(x0, y0, x1, y1, x2, y2, numPoints = 100) {
+            // Resolver sistema para encontrar coeficientes de la parábola ax² + bx + c
+            // Usando interpolación de Lagrange o resolución directa
+            // Simplificamos asumiendo que la parábola pasa por los tres puntos dados
+            const points = [];
+            
+            // Parábola que pasa por (x0,y0), (x1,y1), (x2,y2)
+            // Usamos la forma canónica de la parábola que pasa por 3 puntos
+            for (let i = 0; i <= numPoints; i++) {
+                const t = i / numPoints; // t va de 0 a 1
+                // Interpolación paramétrica simplificada (realidad: se usaría Lagrange)
+                // Para fines visuales, usamos una aproximación
+                const x = x0 + t * (x2 - x0);
+                
+                // En lugar de resolver el sistema completo, usamos interpolación cuadrática
+                // f(x) = A*(x-x1)*(x-x2)/((x0-x1)*(x0-x2)) + B*(x-x0)*(x-x2)/((x1-x0)*(x1-x2)) + C*(x-x0)*(x-x1)/((x2-x0)*(x2-x1))
+                const denom0 = (x0 - x1) * (x0 - x2);
+                const denom1 = (x1 - x0) * (x1 - x2);
+                const denom2 = (x2 - x0) * (x2 - x1);
+                
+                const f_x = y0 * ((x - x1) * (x - x2)) / denom0 +
+                           y1 * ((x - x0) * (x - x2)) / denom1 +
+                           y2 * ((x - x0) * (x - x1)) / denom2;
+                           
+                points.push({x: x, y: f_x});
+            }
+            
+            return points;
+        }
+
+        // Actualizar gráfico
+        function updatePlot(n) {
+            // Definir función f(x) = x²
+            const f = x => x * x;
+            const a = 0;
+            const b = 2;
+            const dx = (b - a) / n;
+            
+            // Generar datos para la curva original
+            const xOriginal = [];
+            const yOriginal = [];
+            for (let x = a; x <= b; x += 0.01) {
+                xOriginal.push(x);
+                yOriginal.push(f(x));
+            }
+            
+            // Calcular puntos de evaluación
+            const xPoints = [];
+            const yPoints = [];
+            for (let i = 0; i <= n; i++) {
+                const x = a + i * dx;
+                xPoints.push(x);
+                yPoints.push(f(x));
+            }
+            
+            // Crear trazos
+            const traces = [
+                {
+                    x: xOriginal,
+                    y: yOriginal,
+                    mode: 'lines',
+                    name: 'f(x) = x²',
+                    line: {color: '#FF6B6B', width: 3}
+                },
+                {
+                    x: xPoints,
+                    y: yPoints,
+                    mode: 'markers',
+                    name: 'Puntos de evaluación',
+                    marker: {color: '#FFE66D', size: 8}
+                }
+            ];
+            
+            // Agregar arcos parabólicos (cada 2 subintervalos = 3 puntos)
+            for (let i = 0; i < n; i += 2) {
+                const idx0 = i;
+                const idx1 = i + 1;
+                const idx2 = i + 2;
+                
+                if (idx2 <= n) {
+                    const x0 = xPoints[idx0];
+                    const y0 = yPoints[idx0];
+                    const x1 = xPoints[idx1];
+                    const y1 = yPoints[idx1];
+                    const x2 = xPoints[idx2];
+                    const y2 = yPoints[idx2];
+                    
+                    const parabolaPoints = getParabolaPoints(x0, y0, x1, y1, x2, y2);
+                    const px = parabolaPoints.map(p => p.x);
+                    const py = parabolaPoints.map(p => p.y);
+                    
+                    traces.push({
+                        x: px,
+                        y: py,
+                        mode: 'lines',
+                        name: `Arco parabólico ${i/2 + 1}`,
+                        line: {color: '#4ECDC4', width: 2, dash: 'dot'},
+                        showlegend: false
+                    });
+                }
+            }
+            
+            // Configurar layout
+            const layout = {
+                title: `Regla de Simpson: f(x) = x² en [${a}, ${b}], n=${n}`,
+                xaxis: {title: 'x'},
+                yaxis: {title: 'f(x)'},
+                hovermode: 'closest',
+                plot_bgcolor: 'rgba(0,0,0,0)',
+                paper_bgcolor: 'rgba(0,0,0,0)'
+            };
+            
+            // Actualizar gráfico
+            Plotly.newPlot('graph-container', traces, layout, {responsive: true});
+            
+            // Calcular aproximación
+            const approximation = simpsonRule(f, a, b, n);
+            const exactValue = 8/3; // Integral exacta de x² de 0 a 2
+            const error = Math.abs(approximation - exactValue);
+            
+            // Actualizar estadísticas
+            document.getElementById('approximation').textContent = approximation.toFixed(4);
+            document.getElementById('exact').textContent = exactValue.toFixed(4);
+            document.getElementById('error').textContent = error.toFixed(4);
+        }
+
+        // Event listener para el slider
+        document.getElementById('n-slider').addEventListener('input', function() {
+            const n = parseInt(this.value);
+            document.getElementById('n-value').textContent = n;
+            updatePlot(n);
+        });
+
+        // Inicializar gráfico con n=4
+        document.addEventListener('DOMContentLoaded', function() {
+            updatePlot(4);
+        });
+    </script>
+</body>
+</html>
