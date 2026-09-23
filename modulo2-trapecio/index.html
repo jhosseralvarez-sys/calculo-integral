@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Módulo 2: Regla del Trapecio</title>
+    <!-- KaTeX CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.0/dist/katex.min.css">
+    <!-- Plotly.js -->
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <style>
+        :root {
+            --primary-blue: #0d1b2a;
+            --secondary-blue: #1b263b;
+            --accent-blue: #415a77;
+            --light-blue: #778da9;
+            --text-light: #e0e1dd;
+            --error-red: #ff6b6b;
+            --error-blue: #4cc9f0;
+        }
+        
+        body {
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue));
+            color: var(--text-light);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .back-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: rgba(27, 38, 59, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: bold;
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+        
+        .back-button:hover {
+            background: rgba(65, 90, 119, 0.9);
+            transform: translateY(-2px);
+        }
+        
+        h1 {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 30px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .section {
+            background: rgba(27, 38, 59, 0.3);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+        
+        h2 {
+            color: var(--light-blue);
+            border-bottom: 2px solid var(--accent-blue);
+            padding-bottom: 10px;
+            margin-top: 0;
+        }
+        
+        .interactive-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .graph-container {
+            height: 500px;
+            background: rgba(13, 27, 42, 0.5);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(27, 38, 59, 0.5);
+            padding: 15px;
+            border-radius: 10px;
+        }
+        
+        .slider-container {
+            flex: 1;
+            min-width: 250px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+        
+        input[type="range"] {
+            width: 100%;
+            height: 8px;
+            border-radius: 4px;
+            background: var(--accent-blue);
+            outline: none;
+        }
+        
+        .results {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: space-around;
+            background: rgba(27, 38, 59, 0.5);
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+        
+        .result-box {
+            text-align: center;
+            padding: 15px;
+            border-radius: 10px;
+            min-width: 200px;
+        }
+        
+        .trapezoid-result { background: rgba(76, 201, 240, 0.2); }
+        .exact-result { background: rgba(119, 141, 169, 0.2); }
+        .error-result { background: rgba(255, 107, 107, 0.2); }
+        
+        .result-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-top: 5px;
+            color: var(--text-light);
+        }
+        
+        .example {
+            margin-bottom: 30px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+            background: rgba(13, 27, 42, 0.3);
+        }
+        
+        th, td {
+            border: 1px solid var(--light-blue);
+            padding: 10px;
+            text-align: center;
+        }
+        
+        th {
+            background: rgba(65, 90, 119, 0.5);
+        }
+        
+        .formula-step {
+            margin: 15px 0;
+            padding: 10px;
+            background: rgba(65, 90, 119, 0.2);
+            border-left: 3px solid var(--light-blue);
+        }
+        
+        @media (max-width: 768px) {
+            .controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .results {
+                flex-direction: column;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <a href="../index.html" class="back-button">← Volver al menú</a>
+    
+    <div class="container">
+        <h1>Módulo 2: Regla del Trapecio</h1>
+        
+        <!-- SECCIÓN 1: Teoría y Historia -->
+        <div class="section">
+            <h2>1. Teoría y Historia</h2>
+            <p>La Regla del Trapecio es un método numérico para aproximar integrales definidas. En lugar de usar rectángulos como en la regla del punto medio o las sumas de Riemann, esta técnica utiliza trapecios para estimar el área bajo la curva.</p>
+            
+            <p>Geométricamente, la idea es dividir el intervalo \([a, b]\) en \(n\) subintervalos iguales de ancho \(\Delta x = \frac{b-a}{n}\) y aproximar el área bajo la curva \(f(x)\) en cada subintervalo como un trapecio.</p>
+            
+            <p>La fórmula matemática de la Regla del Trapecio es:</p>
+            \[ T_n = \frac{\Delta x}{2} \left[ f(x_0) + 2\sum_{i=1}^{n-1} f(x_i) + f(x_n) \right] \]
+            donde \(\Delta x = \frac{b-a}{n}\) y \(x_i = a + i\Delta x\).
+            
+            <p>La Regla del Trapecio puede sobreestimar o subestimar el área real dependiendo de la concavidad de la función:</p>
+            <ul>
+                <li>Cuando la función es <strong>cóncava hacia arriba</strong> (\(f''(x) > 0\)), la regla tiende a <strong>sobreestimar</strong> el área real.</li>
+                <li>Cuando la función es <strong>cóncava hacia abajo</strong> (\(f''(x) < 0\)), la regla tiende a <strong>subestimar</strong> el área real.</li>
+            </ul>
+        </div>
+        
+        <!-- SECCIÓN 2: Laboratorio Interactivo -->
+        <div class="section">
+            <h2>2. Laboratorio Interactivo</h2>
+            <div class="interactive-container">
+                <div class="graph-container" id="graph"></div>
+                
+                <div class="controls">
+                    <div class="slider-container">
+                        <label for="nSlider">Número de trapecios (n): <span id="nValue">10</span></label>
+                        <input type="range" id="nSlider" min="1" max="50" value="10">
+                    </div>
+                </div>
+                
+                <div class="results">
+                    <div class="result-box trapezoid-result">
+                        <div>Área Aproximada (Trapezoide)</div>
+                        <div class="result-value" id="trapezoidArea">0.0000</div>
+                    </div>
+                    <div class="result-box exact-result">
+                        <div>Área Exacta</div>
+                        <div class="result-value" id="exactArea">2.6667</div>
+                    </div>
+                    <div class="result-box error-result">
+                        <div>Error Absoluto</div>
+                        <div class="result-value" id="errorValue">0.0000</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- SECCIÓN 3: Ejemplos Resueltos Paso a Paso -->
+        <div class="section">
+            <h2>3. Ejemplos Resueltos Paso a Paso</h2>
+            
+            <div class="example">
+                <h3>Ejemplo 1: Aproximar \(\int_0^2 x^2 \, dx\) con \(n=4\)</h3>
+                
+                <p>Primero calculamos \(\Delta x\):</p>
+                \[ \Delta x = \frac{b-a}{n} = \frac{2-0}{4} = 0.5 \]
+                
+                <p>Los puntos \(x_i\) y sus valores \(f(x_i) = x_i^2\):</p>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>\(i\)</th>
+                            <th>\(x_i\)</th>
+                            <th>\(f(x_i) = x_i^2\)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>0</td>
+                            <td>0.0</td>
+                            <td>0.0000</td>
+                        </tr>
+                        <tr>
+                            <td>1</td>
+                            <td>0.5</td>
+                            <td>0.2500</td>
+                        </tr>
+                        <tr>
+                            <td>2</td>
+                            <td>1.0</td>
+                            <td>1.0000</td>
+                        </tr>
+                        <tr>
+                            <td>3</td>
+                            <td>1.5</td>
+                            <td>2.2500</td>
+                        </tr>
+                        <tr>
+                            <td>4</td>
+                            <td>2.0</td>
+                            <td>4.0000</td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <div class="formula-step">
+                    Sustituimos en la fórmula de la Regla del Trapecio:
+                    \[ T_4 = \frac{\Delta x}{2} \left[ f(x_0) + 2(f(x_1) + f(x_2) + f(x_3)) + f(x_4) \right] \]
+                </div>
+                
+                <div class="formula-step">
+                    \[ T_4 = \frac{0.5}{2} \left[ 0 + 2(0.25 + 1.00 + 2.25) + 4.00 \right] \]
+                </div>
+                
+                <div class="formula-step">
+                    \[ T_4 = 0.25 \left[ 0 + 2(3.50) + 4.00 \right] = 0.25 \left[ 0 + 7.00 + 4.00 \right] = 0.25 \times 11.00 = 2.75 \]
+                </div>
+                
+                <p>El valor exacto es \(\frac{8}{3} \approx 2.6667\), por lo tanto, el error es \(|2.75 - 2.6667| = 0.0833\).</p>
+            </div>
+            
+            <div class="example">
+                <h3>Ejemplo 2: Aproximar \(\int_1^3 \frac{1}{x} \, dx\) con \(n=5\)</h3>
+                
+                <p>Calculamos \(\Delta x\):</p>
+                \[ \Delta x = \frac{b-a}{n} = \frac{3-1}{5} = 0.4 \]
+                
+                <p>Los puntos \(x_i\) y sus valores \(f(x_i) = \frac{1}{x_i}\):</p>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>\(i\)</th>
+                            <th>\(x_i\)</th>
+                            <th>\(f(x_i) = \frac{1}{x_i}\)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>0</td>
+                            <td>1.0</td>
+                            <td>1.0000</td>
+                        </tr>
+                        <tr>
+                            <td>1</td>
+                            <td>1.4</td>
+                            <td>0.7143</td>
+                        </tr>
+                        <tr>
+                            <td>2</td>
+                            <td>1.8</td>
+                            <td>0.5556</td>
+                        </tr>
+                        <tr>
+                            <td>3</td>
+                            <td>2.2</td>
+                            <td>0.4545</td>
+                        </tr>
+                        <tr>
+                            <td>4</td>
+                            <td>2.6</td>
+                            <td>0.3846</td>
+                        </tr>
+                        <tr>
+                            <td>5</td>
+                            <td>3.0</td>
+                            <td>0.3333</td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <div class="formula-step">
+                    Aplicamos la fórmula de la Regla del Trapecio:
+                    \[ T_5 = \frac{\Delta x}{2} \left[ f(x_0) + 2\sum_{i=1}^{4} f(x_i) + f(x_5) \right] \]
+                </div>
+                
+                <div class="formula-step">
+                    \[ T_5 = \frac{0.4}{2} \left[ 1.0000 + 2(0.7143 + 0.5556 + 0.4545 + 0.3846) + 0.3333 \right] \]
+                </div>
+                
+                <div class="formula-step">
+                    \[ T_5 = 0.2 \left[ 1.0000 + 2(2.1090) + 0.3333 \right] = 0.2 \left[ 1.0000 + 4.2180 + 0.3333 \right] \]
+                </div>
+                
+                <div class="formula-step">
+                    \[ T_5 = 0.2 \times 5.5513 = 1.1103 \]
+                </div>
+                
+                <p>El valor exacto es \(\ln(3) - \ln(1) = \ln(3) \approx 1.0986\), por lo tanto, el error es \(|1.1103 - 1.0986| = 0.0117\).</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- KaTeX JS -->
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.0/dist/katex.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.0/dist/contrib/auto-render.min.js"></script>
+    
+    <script>
+        // Render KaTeX formulas on page load
+        document.addEventListener("DOMContentLoaded", function() {
+            renderMathInElement(document.body, {
+                delimiters: [
+                    {left: "\\[", right: "\\]", display: true},
+                    {left: "\\(", right: "\\)", display: false}
+                ]
+            });
+        });
+
+        // Interactive graph functionality
+        const nSlider = document.getElementById('nSlider');
+        const nValue = document.getElementById('nValue');
+        const trapezoidArea = document.getElementById('trapezoidArea');
+        const exactArea = document.getElementById('exactArea');
+        const errorValue = document.getElementById('errorValue');
+
+        // Exact area for x^2 from 0 to 2 is 8/3 ≈ 2.6667
+        const exactValue = 8/3;
+
+        // Function to calculate trapezoidal rule
+        function trapezoidalRule(func, a, b, n) {
+            const dx = (b - a) / n;
+            let sum = func(a) + func(b);
+            
+            for (let i = 1; i < n; i++) {
+                const x = a + i * dx;
+                sum += 2 * func(x);
+            }
+            
+            return (dx / 2) * sum;
+        }
+
+        // Function to create data for plot
+        function createPlotData(n) {
+            const a = 0;
+            const b = 2;
+            const dx = (b - a) / n;
+            
+            // Function to integrate: f(x) = x^2
+            const func = x => x * x;
+            
+            // Generate smooth curve points
+            const xCurve = [];
+            const yCurve = [];
+            for (let i = 0; i <= 1000; i++) {
+                const x = a + (i / 1000) * (b - a);
+                xCurve.push(x);
+                yCurve.push(func(x));
+            }
+            
+            // Trapezoid coordinates
+            const xTrap = [];
+            const yTrap = [];
+            const fillX = [];
+            const fillY = [];
+            
+            for (let i = 0; i <= n; i++) {
+                const x = a + i * dx;
+                xTrap.push(x);
+                yTrap.push(func(x));
+                
+                if (i === 0 || i === n) {
+                    fillX.push(x);
+                    fillY.push(func(x));
+                } else {
+                    fillX.push(x, x);
+                    fillY.push(func(x), func(x));
+                }
+            }
+            
+            // Add last point for fill
+            fillX.push(fillX[fillX.length - 1]);
+            fillY.push(0);
+            
+            // Add first point at end for fill
+            fillX.push(fillX[0]);
+            fillY.push(0);
+            
+            // Calculate areas for each trapezoid to determine over/under estimation
+            const shapes = [];
+            
+            for (let i = 0; i < n; i++) {
+                const x0 = a + i * dx;
+                const x1 = a + (i + 1) * dx;
+                const y0 = func(x0);
+                const y1 = func(x1);
+                
+                // Midpoint for checking concavity
+                const midX = (x0 + x1) / 2;
+                const midY = func(midX);
+                
+                // Trapezoid area
+                const trapY = (y0 + y1) / 2;
+                
+                // Determine if over or under estimation based on concavity
+                // For x^2, it's always concave up, so trapezoids will overestimate
+                const isOverEstimate = trapY > midY; // Simplified check
+                
+                // Create trapezoid shape
+                shapes.push({
+                    type: 'path',
+                    path: `M ${x0},${0} L ${x0},${y0} L ${x1},${y1} L ${x1},${0} Z`,
+                    fillcolor: isOverEstimate ? 'rgba(255, 107, 107, 0.3)' : 'rgba(76, 201, 240, 0.3)',
+                    line: {width: 1, color: isOverEstimate ? 'red' : 'blue'},
+                    layer: 'below'
+                });
+                
+                // Add error triangle visualization
+                const midTrapY = (y0 + y1) / 2;
+                if (Math.abs(midY - midTrapY) > 0.001) { // Only add if significant difference
+                    const avgX = (x0 + x1) / 2;
+                    const color = midY > midTrapY ? 'rgba(255, 107, 107, 0.5)' : 'rgba(76, 201, 240, 0.5)';
+                    
+                    shapes.push({
+                        type: 'path',
+                        path: `M ${avgX - dx/3},${midY} L ${avgX},${midTrapY} L ${avgX + dx/3},${midY} Z`,
+                        fillcolor: color,
+                        line: {width: 0},
+                        layer: 'above'
+                    });
+                }
+            }
+            
+            const trace1 = {
+                x: xCurve,
+                y: yCurve,
+                mode: 'lines',
+                name: 'f(x) = x²',
+                line: {color: '#778da9', width: 3}
+            };
+            
+            const trace2 = {
+                x: xTrap,
+                y: yTrap,
+                mode: 'lines+markers',
+                name: 'Trapecios',
+                line: {color: '#415a77', width: 2},
+                marker: {size: 6, color: '#e0e1dd'}
+            };
+            
+            const layout = {
+                title: `Regla del Trapecio con n=${n}`,
+                xaxis: {title: 'x', range: [a, b]},
+                yaxis: {title: 'f(x)', range: [0, 4.5]},
+                showlegend: true,
+                hovermode: 'closest',
+                shapes: shapes,
+                plot_bgcolor: 'rgba(13, 27, 42, 0.5)',
+                paper_bgcolor: 'rgba(13, 27, 42, 0.3)'
+            };
+            
+            const data = [trace1, trace2];
+            
+            return {data, layout};
+        }
+
+        // Update graph when slider changes
+        function updateGraph() {
+            const n = parseInt(nSlider.value);
+            nValue.textContent = n;
+            
+            const plotData = createPlotData(n);
+            Plotly.newPlot('graph', plotData.data, plotData.layout);
+            
+            // Calculate trapezoidal approximation
+            const func = x => x * x;
+            const approxValue = trapezoidalRule(func, 0, 2, n);
+            
+            trapezoidArea.textContent = approxValue.toFixed(4);
+            exactArea.textContent = exactValue.toFixed(4);
+            errorValue.textContent = Math.abs(approxValue - exactValue).toFixed(4);
+        }
+
+        // Initial setup
+        nSlider.addEventListener('input', updateGraph);
+        updateGraph();
+    </script>
+</body>
+</html>
