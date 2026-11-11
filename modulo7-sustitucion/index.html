@@ -1,23 +1,637 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Módulo 7 - Próximamente</title>
-    <style>
-        body { font-family: sans-serif; background: #1e3c72; color: white; display: flex; justify-content: center; align-items: center; min-height: 100vh; text-align: center; }
-        .container { padding: 40px; }
-        h1 { font-size: 3em; margin-bottom: 20px; }
-        p { font-size: 1.3em; margin-bottom: 30px; }
-        a { color: #ffd700; text-decoration: none; font-size: 1.2em; }
-        a:hover { text-decoration: underline; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Módulo 7: Integración por Sustitución (Potencias)</title>
+
+<!-- KaTeX -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+
+<!-- Plotly.js -->
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --azul-1: #0b1d3a;
+    --azul-2: #13315c;
+    --azul-3: #1e4a80;
+    --acento-azul: #4da3ff;
+    --acento-verde: #3ddc97;
+    --texto: #ffffff;
+    --texto-suave: rgba(255, 255, 255, 0.78);
+    --vidrio: rgba(255, 255, 255, 0.08);
+    --vidrio-borde: rgba(255, 255, 255, 0.18);
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: "Segoe UI", Roboto, Arial, sans-serif;
+    color: var(--texto);
+    background: linear-gradient(135deg, var(--azul-1) 0%, var(--azul-2) 50%, var(--azul-3) 100%);
+    background-attachment: fixed;
+    min-height: 100vh;
+    line-height: 1.6;
+    padding: 90px 20px 40px;
+  }
+
+  /* ---------- Botón volver ---------- */
+  .btn-volver {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    z-index: 1000;
+    display: inline-block;
+    padding: 10px 18px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.12);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid var(--vidrio-borde);
+    color: #fff;
+    text-decoration: none;
+    font-weight: 600;
+    transition: background 0.2s, transform 0.2s;
+  }
+  .btn-volver:hover { background: rgba(255, 255, 255, 0.22); transform: translateY(-2px); }
+
+  /* ---------- Encabezado ---------- */
+  header { text-align: center; margin-bottom: 40px; }
+  header h1 { font-size: 2.2rem; margin-bottom: 8px; }
+  header p { color: var(--texto-suave); font-size: 1.05rem; }
+
+  /* ---------- Tarjetas glassmorphism ---------- */
+  .card {
+    max-width: 1100px;
+    margin: 0 auto 30px;
+    padding: 28px 32px;
+    background: var(--vidrio);
+    border: 1px solid var(--vidrio-borde);
+    border-radius: 20px;
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+  }
+  .card h2 {
+    font-size: 1.6rem;
+    margin-bottom: 14px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--vidrio-borde);
+  }
+  .card h3 { font-size: 1.2rem; margin: 22px 0 10px; color: var(--acento-azul); }
+  .card p { margin-bottom: 12px; color: var(--texto-suave); }
+  .card strong { color: #fff; }
+
+  .formula-destacada {
+    text-align: center;
+    background: rgba(0, 0, 0, 0.25);
+    border-radius: 14px;
+    padding: 18px;
+    margin: 18px 0;
+    overflow-x: auto;
+    font-size: 1.2rem;
+  }
+
+  .pasos { list-style: none; counter-reset: paso; margin: 10px 0; }
+  .pasos li {
+    counter-increment: paso;
+    position: relative;
+    padding: 12px 14px 12px 56px;
+    margin-bottom: 10px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    color: var(--texto-suave);
+  }
+  .pasos li::before {
+    content: counter(paso);
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: var(--acento-azul);
+    color: #0b1d3a;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .nota {
+    background: rgba(61, 220, 151, 0.12);
+    border-left: 4px solid var(--acento-verde);
+    padding: 12px 16px;
+    border-radius: 10px;
+    margin: 14px 0;
+    color: var(--texto-suave);
+  }
+
+  /* ---------- Laboratorio ---------- */
+  .controles {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 14px;
+    padding: 20px;
+    margin-bottom: 22px;
+  }
+  .control-fila {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 12px;
+  }
+  .control-fila label {
+    min-width: 60px;
+    font-weight: 600;
+    font-size: 1.05rem;
+  }
+  .control-fila input[type="range"] {
+    flex: 1;
+    min-width: 180px;
+    accent-color: var(--acento-azul);
+  }
+  .valor {
+    font-family: Consolas, monospace;
+    background: rgba(255, 255, 255, 0.12);
+    padding: 4px 10px;
+    border-radius: 8px;
+    min-width: 70px;
+    text-align: center;
+  }
+
+  .graficas {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+  }
+  .grafica-caja {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 14px;
+    padding: 10px;
+  }
+  .grafica-caja h4 {
+    text-align: center;
+    margin: 6px 0 4px;
+    font-size: 1.05rem;
+  }
+  .grafica { width: 100%; height: 360px; }
+
+  .resultados {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+    margin-top: 22px;
+  }
+  .panel {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 14px;
+    padding: 18px;
+  }
+  .panel h4 { margin-bottom: 10px; color: var(--acento-azul); }
+  .panel.verde h4 { color: var(--acento-verde); }
+  .sustitucion { overflow-x: auto; padding: 6px 0; }
+
+  .valor-grande {
+    text-align: center;
+    font-size: 1.3rem;
+    margin-top: 14px;
+    padding: 14px;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+  }
+  .aviso { color: #ffd166; font-size: 0.95rem; margin-top: 8px; }
+
+  /* ---------- Ejemplos ---------- */
+  .ejemplo-titulo {
+    font-size: 1.3rem;
+    color: var(--acento-verde);
+    margin-bottom: 12px;
+  }
+  .bloque-paso {
+    background: rgba(0, 0, 0, 0.22);
+    border-radius: 14px;
+    padding: 16px 20px;
+    margin: 14px 0;
+    overflow-x: auto;
+  }
+  .bloque-paso .titulo-paso {
+    font-weight: 700;
+    color: var(--acento-azul);
+    margin-bottom: 6px;
+  }
+  .bloque-paso .explica {
+    color: var(--texto-suave);
+    font-size: 0.97rem;
+    margin-top: 8px;
+  }
+  .resultado-final {
+    text-align: center;
+    background: rgba(61, 220, 151, 0.15);
+    border: 1px solid rgba(61, 220, 151, 0.4);
+    border-radius: 14px;
+    padding: 16px;
+    margin-top: 16px;
+    font-size: 1.15rem;
+  }
+
+  footer {
+    text-align: center;
+    color: var(--texto-suave);
+    font-size: 0.9rem;
+    margin-top: 20px;
+  }
+
+  /* ---------- Responsive ---------- */
+  @media (max-width: 800px) {
+    .graficas, .resultados { grid-template-columns: 1fr; }
+    .grafica { height: 300px; }
+    header h1 { font-size: 1.7rem; }
+    .card { padding: 20px; }
+    body { padding: 80px 12px 30px; }
+  }
+</style>
 </head>
 <body>
-    <div class="container">
-        <h1>🚧 Próximamente</h1>
-        <p>Este módulo estará disponible en la <strong>Fase 2</strong> del proyecto.</p>
-        <a href="../index.html">← Volver al menú principal</a>
+
+<a href="../index.html" class="btn-volver">← Volver al menú</a>
+
+<header>
+  <h1>Módulo 7: Integración por Sustitución (Potencias)</h1>
+  <p>Teoría, laboratorio interactivo y ejemplos resueltos</p>
+</header>
+
+<!-- ================================================================
+     SECCIÓN 1: TEORÍA Y JUSTIFICACIÓN
+     ================================================================ -->
+<section class="card" id="seccion-teoria">
+  <h2>Sección 1: Teoría y Justificación</h2>
+
+  <p>
+    La <strong>integración por sustitución</strong> es el método inverso de la
+    <strong>regla de la cadena</strong> en derivación. Recuerda que, al derivar una
+    composición, aparece un factor extra: la derivada de la función interna. La
+    sustitución "deshace" ese factor, cambiando la variable <em>x</em> por una nueva variable <em>u</em>
+    que simplifica la integral.
+  </p>
+
+  <h3>La regla básica de potencias</h3>
+  <p>Cuando la integral tiene la forma de una potencia de <em>u</em> multiplicada por <em>du</em>, se integra así:</p>
+  <div class="formula-destacada">
+    \(\int u^n \, du = \frac{u^{n+1}}{n+1} + C \quad \text{para } n \neq -1\)
+  </div>
+  <p>
+    La restricción <em>n ≠ −1</em> existe porque la fórmula tiene el denominador <em>n + 1</em>, que se
+    volvería cero. Para <em>n = −1</em> la integral da <em>ln|u| + C</em>.
+  </p>
+
+  <h3>Pasos clave del método</h3>
+  <ol class="pasos">
+    <li><strong>Elegir</strong> \(u = g(x)\): una parte de la integral, generalmente la función "interna" de una composición.</li>
+    <li><strong>Calcular</strong> \(du = g'(x)\,dx\): derivar <em>u</em> respecto a <em>x</em> y escribir la diferencial.</li>
+    <li><strong>Reemplazar</strong> en la integral: sustituir todo lo que esté en función de <em>x</em> por expresiones en <em>u</em>. Si sobra algún factor en <em>x</em>, despejarlo de <em>du</em>.</li>
+    <li><strong>Integrar</strong> respecto a <em>u</em> usando las reglas conocidas (aquí, la regla de potencias).</li>
+    <li><strong>Volver</strong> a la variable original: reemplazar <em>u</em> por <em>g(x)</em> en el resultado.</li>
+  </ol>
+
+  <div class="nota">
+    <strong>Idea clave:</strong> si el factor que sobra no es exactamente <em>du</em>, pero es un múltiplo
+    constante de él, basta con ajustar la constante. Por ejemplo, si <em>du = 3x²dx</em>, entonces
+    <em>x²dx = du/3</em>. Ese <em>1/3</em> sale de dividir ambos lados entre 3.
+  </div>
+</section>
+
+<!-- ================================================================
+     SECCIÓN 2: LABORATORIO INTERACTIVO
+     ================================================================ -->
+<section class="card" id="seccion-laboratorio">
+  <h2>Sección 2: Laboratorio Interactivo</h2>
+
+  <p>
+    Consideramos la integral <strong>∫ x² / √(x³+2) dx</strong> con la sustitución
+    <strong>u = x³ + 2</strong>. Al transformarla, la función cambia de forma en el eje <em>u</em>,
+    pero <strong>el área bajo la curva se conserva</strong>. Mueve los deslizadores para comprobarlo.
+  </p>
+
+  <div class="controles">
+    <div class="control-fila">
+      <label for="slider-a">a =</label>
+      <input type="range" id="slider-a" min="0" max="2" step="0.01" value="0">
+      <span class="valor" id="valor-a">0.00</span>
     </div>
+    <div class="control-fila">
+      <label for="slider-b">b =</label>
+      <input type="range" id="slider-b" min="0" max="2" step="0.01" value="2">
+      <span class="valor" id="valor-b">2.00</span>
+    </div>
+    <p class="aviso" id="aviso-limites"></p>
+  </div>
+
+  <div class="graficas">
+    <div class="grafica-caja">
+      <h4>Eje izquierdo: variable <em>x</em></h4>
+      <div id="grafica-x" class="grafica"></div>
+    </div>
+    <div class="grafica-caja">
+      <h4>Eje derecho: variable <em>u</em></h4>
+      <div id="grafica-u" class="grafica"></div>
+    </div>
+  </div>
+
+  <div class="resultados">
+    <div class="panel">
+      <h4>Transformación de los límites</h4>
+      <div class="sustitucion" id="sustitucion-limites"></div>
+    </div>
+    <div class="panel verde">
+      <h4>Cálculo de la integral</h4>
+      <div class="sustitucion" id="calculo-integral"></div>
+    </div>
+  </div>
+
+  <div class="valor-grande" id="comprobacion"></div>
+</section>
+
+<!-- ================================================================
+     SECCIÓN 3: EJEMPLOS RESUELTOS PASO A PASO
+     ================================================================ -->
+<section class="card" id="seccion-ejemplos">
+  <h2>Sección 3: Ejemplos Resueltos Paso a Paso</h2>
+
+  <!-- EJEMPLO 1 -->
+  <div id="ejemplo-1">
+    <h3 class="ejemplo-titulo">Ejemplo 1: ∫ x² / √(x³+2) dx</h3>
+
+    <div class="bloque-paso">
+      <div class="titulo-paso">Paso 1: Identificar u</div>
+      <div>\(u = x^3 + 2\)</div>
+      <div class="explica">Elegimos como <em>u</em> la función interna de la raíz, porque su derivada (\(3x^2\)) aparece multiplicando en el integrando.</div>
+    </div>
+
+    <div class="bloque-paso">
+      <div class="titulo-paso">Paso 2: Derivar para hallar du</div>
+      <div>\(du = 3x^2\,dx \quad \Rightarrow \quad x^2\,dx = \frac{du}{3}\)</div>
+      <div class="explica">
+        Aplicamos la derivada de una suma: \(\frac{d}{dx}(x^3) = 3x^2\) y \(\frac{d}{dx}(2) = 0\).
+        El coeficiente <strong>1/3</strong> aparece porque el integrando tiene <em>x²dx</em>, no <em>3x²dx</em>:
+        dividimos ambos lados de <em>du = 3x²dx</em> entre 3.
+      </div>
+    </div>
+
+    <div class="bloque-paso">
+      <div class="titulo-paso">Paso 3: Reemplazar e integrar</div>
+      <div>
+        \(\int \frac{x^2}{\sqrt{x^3+2}}\,dx = \int \frac{1}{\sqrt{u}}\cdot\frac{du}{3} = \frac{1}{3}\int u^{-1/2}\,du\)
+      </div>
+      <div>
+        \(= \frac{1}{3}\cdot\frac{u^{1/2}}{\tfrac{1}{2}} + C = \frac{2}{3}u^{1/2} + C\)
+      </div>
+      <div class="explica">
+        Usamos la fórmula \(\int u^n\,du = \frac{u^{n+1}}{n+1}+C\) con \(n = -\tfrac12\), así que \(n+1 = \tfrac12\).
+        Dividir entre \(\tfrac12\) equivale a multiplicar por 2, por eso aparece el <strong>2/3</strong>
+        (el \(1/3\) del paso anterior se multiplica con ese 2).
+      </div>
+    </div>
+
+    <div class="bloque-paso">
+      <div class="titulo-paso">Paso 4: Volver a la variable x</div>
+      <div>\(\int \frac{x^2}{\sqrt{x^3+2}}\,dx = \frac{2}{3}\sqrt{x^3+2} + C\)</div>
+      <div class="explica">Sustituimos \(u = x^3+2\) en el resultado.</div>
+    </div>
+
+    <div class="resultado-final">
+      <strong>Comprobación:</strong> derivamos \(\frac{2}{3}(x^3+2)^{1/2}\) con la regla de la cadena:
+      \(\frac{2}{3}\cdot\frac{1}{2}(x^3+2)^{-1/2}\cdot 3x^2 = \frac{x^2}{\sqrt{x^3+2}}\) ✔
+    </div>
+  </div>
+
+  <!-- EJEMPLO 2 -->
+  <div id="ejemplo-2" style="margin-top: 40px;">
+    <h3 class="ejemplo-titulo">Ejemplo 2: ∫ (x+3)√(x²+6x) dx</h3>
+
+    <div class="bloque-paso">
+      <div class="titulo-paso">Paso 1: Identificar u</div>
+      <div>\(u = x^2 + 6x\)</div>
+      <div class="explica">La función interna de la raíz es \(x^2+6x\), y su derivada es casi el factor \((x+3)\) que aparece en el integrando.</div>
+    </div>
+
+    <div class="bloque-paso">
+      <div class="titulo-paso">Paso 2: Derivar para hallar du</div>
+      <div>\(du = (2x+6)\,dx = 2(x+3)\,dx \quad \Rightarrow \quad (x+3)\,dx = \frac{du}{2}\)</div>
+      <div class="explica">
+        Derivamos término a término: \(\frac{d}{dx}(x^2) = 2x\) y \(\frac{d}{dx}(6x) = 6\), así que \(du = (2x+6)\,dx\).
+        Factorizamos el 2 para obtener \(2(x+3)\). El <strong>1/2</strong> aparece porque \((x+3)\,dx\) es exactamente
+        la <strong>mitad</strong> de \(du\).
+      </div>
+    </div>
+
+    <div class="bloque-paso">
+      <div class="titulo-paso">Paso 3: Reemplazar e integrar</div>
+      <div>
+        \(\int (x+3)\sqrt{x^2+6x}\,dx = \int \sqrt{u}\cdot\frac{du}{2} = \frac{1}{2}\int u^{1/2}\,du\)
+      </div>
+      <div>
+        \(= \frac{1}{2}\cdot\frac{u^{3/2}}{\tfrac{3}{2}} + C = \frac{1}{3}u^{3/2} + C\)
+      </div>
+      <div class="explica">
+        Usamos \(\int u^n\,du = \frac{u^{n+1}}{n+1}+C\) con \(n = \tfrac12\), así que \(n+1 = \tfrac32\).
+        Dividir entre \(\tfrac32\) equivale a multiplicar por \(\tfrac23\). Ese \(\tfrac23\) se combina con el \(\tfrac12\) del paso anterior y da \(\tfrac13\).
+      </div>
+    </div>
+
+    <div class="bloque-paso">
+      <div class="titulo-paso">Paso 4: Volver a la variable x</div>
+      <div>\(\int (x+3)\sqrt{x^2+6x}\,dx = \frac{1}{3}(x^2+6x)^{3/2} + C\)</div>
+      <div class="explica">Sustituimos \(u = x^2 + 6x\) en el resultado.</div>
+    </div>
+
+    <div class="resultado-final">
+      <strong>Comprobación:</strong> \(\frac{d}{dx}\left[\frac{1}{3}(x^2+6x)^{3/2}\right] = \frac{1}{3}\cdot\frac{3}{2}(x^2+6x)^{1/2}\cdot(2x+6) = (x+3)\sqrt{x^2+6x}\) ✔
+    </div>
+  </div>
+</section>
+
+<footer>Módulo 7 · Cálculo Integral</footer>
+
+<script>
+  // ---------- Funciones matemáticas ----------
+  // Eje x: f(x) = x² / √(x³+2)
+  const f = x => x * x / Math.sqrt(x * x * x + 2);
+  // Eje u: g(u) = 1 / (3√u)   (resultado de transformar f(x)dx con u = x³+2)
+  const g = u => 1 / (3 * Math.sqrt(u));
+  // Primitiva en x y en u (para cálculo exacto): F = (2/3)√u
+  const F = u => (2 / 3) * Math.sqrt(u);
+
+  const U = x => x * x * x + 2;   // u(x)
+
+  // Dominio de u para x ∈ [0, 2]
+  const U_MIN = 2, U_MAX = 10;
+
+  // ---------- Referencias a elementos ----------
+  const sliderA = document.getElementById("slider-a");
+  const sliderB = document.getElementById("slider-b");
+  const valorA = document.getElementById("valor-a");
+  const valorB = document.getElementById("valor-b");
+  const aviso = document.getElementById("aviso-limites");
+  const divSustLimites = document.getElementById("sustitucion-limites");
+  const divCalculo = document.getElementById("calculo-integral");
+  const divComprobacion = document.getElementById("comprobacion");
+
+  // ---------- Funciones de render con KaTeX ----------
+  function tex(elemento, latex) {
+    katex.render(latex, elemento, { throwOnError: false, displayMode: true });
+  }
+
+  // ---------- Configuración común de Plotly ----------
+  const layoutBase = {
+    paper_bgcolor: "rgba(0,0,0,0)",
+    plot_bgcolor: "rgba(0,0,0,0)",
+    font: { color: "#ffffff" },
+    margin: { l: 55, r: 25, t: 20, b: 50 },
+    showlegend: false,
+    xaxis: { gridcolor: "rgba(255,255,255,0.12)", zerolinecolor: "rgba(255,255,255,0.4)" },
+    yaxis: { gridcolor: "rgba(255,255,255,0.12)", zerolinecolor: "rgba(255,255,255,0.4)" }
+  };
+  const config = { responsive: true, displayModeBar: false };
+
+  // Puntos para la curva base (sin sombrear)
+  function puntos(fn, desde, hasta, n = 300) {
+    const xs = [], ys = [];
+    for (let i = 0; i <= n; i++) {
+      const t = desde + (hasta - desde) * i / n;
+      xs.push(t);
+      ys.push(fn(t));
+    }
+    return { xs, ys };
+  }
+
+  // ---------- Inicializar gráficas ----------
+  const curvaX = puntos(f, 0, 2);
+  const curvaU = puntos(g, U_MIN, U_MAX);
+
+  function dibujarGraficas() {
+    let a = parseFloat(sliderA.value);
+    let b = parseFloat(sliderB.value);
+
+    // Si a > b, invertimos para dibujar; el signo de la integral cambia
+    let inverso = false;
+    if (a > b) { [a, b] = [b, a]; inverso = true; }
+
+    const ua = U(a), ub = U(b);
+    const uMin = Math.min(ua, ub), uMax = Math.max(ua, ub);
+
+    // Sombreado en x: área bajo f(x) entre a y b
+    const sombX = puntos(f, a, b, 200);
+    const trazaFondoX = {
+      x: curvaX.xs, y: curvaX.ys, mode: "lines",
+      line: { color: "#ffffff", width: 2.5 }, hoverinfo: "skip"
+    };
+    const trazaAreaX = {
+      x: sombX.xs, y: sombX.ys, mode: "lines", fill: "tozeroy",
+      fillcolor: "rgba(77,163,255,0.45)", line: { color: "#4da3ff", width: 1 },
+      hoverinfo: "skip"
+    };
+
+    // Sombreado en u: área bajo g(u) entre u(a) y u(b)
+    const sombU = puntos(g, uMin, uMax, 200);
+    const trazaFondoU = {
+      x: curvaU.xs, y: curvaU.ys, mode: "lines",
+      line: { color: "#ffffff", width: 2.5 }, hoverinfo: "skip"
+    };
+    const trazaAreaU = {
+      x: sombU.xs, y: sombU.ys, mode: "lines", fill: "tozeroy",
+      fillcolor: "rgba(61,220,151,0.45)", line: { color: "#3ddc97", width: 1 },
+      hoverinfo: "skip"
+    };
+
+    const layoutX = {
+      ...layoutBase,
+      xaxis: { ...layoutBase.xaxis, title: "x", range: [-0.1, 2.1] },
+      yaxis: { ...layoutBase.yaxis, title: "f(x)", range: [0, 1.5] }
+    };
+    const layoutU = {
+      ...layoutBase,
+      xaxis: { ...layoutBase.xaxis, title: "u", range: [1, 11] },
+      yaxis: { ...layoutBase.yaxis, title: "g(u)", range: [0, 0.3] }
+    };
+
+    Plotly.react("grafica-x", [trazaFondoX, trazaAreaX], layoutX, config);
+    Plotly.react("grafica-u", [trazaFondoU, trazaAreaU], layoutU, config);
+
+    // ---------- Actualizar textos y cálculos ----------
+    valorA.textContent = parseFloat(sliderA.value).toFixed(2);
+    valorB.textContent = parseFloat(sliderB.value).toFixed(2);
+
+    aviso.textContent = inverso
+      ? "Nota: a > b. Se dibuja el intervalo [b, a] y la integral cambia de signo."
+      : "";
+
+    // Transformación de límites
+    const uaTex = ua.toFixed(3), ubTex = ub.toFixed(3);
+    const aTex = a.toFixed(2), bTex = b.toFixed(2);
+    const ubOrig = parseFloat(sliderB.value).toFixed(2);
+    const uaOrig = parseFloat(sliderA.value).toFixed(2);
+
+    tex(divSustLimites,
+      `u(a) = ${parseFloat(sliderA.value).toFixed(2)}^3 + 2 = ${U(parseFloat(sliderA.value)).toFixed(3)}\\\\[6pt]
+       u(b) = ${parseFloat(sliderB.value).toFixed(2)}^3 + 2 = ${U(parseFloat(sliderB.value)).toFixed(3)}`
+    );
+
+    // Cálculo exacto usando la primitiva
+    const Ia = F(U(parseFloat(sliderA.value)));
+    const Ib = F(U(parseFloat(sliderB.value)));
+    const valorIntegral = Ib - Ia;
+
+    tex(divCalculo,
+      `\\int_{${uaOrig}}^{${ubOrig}} \\frac{x^2}{\\sqrt{x^3+2}}\\,dx
+       = \\left[\\frac{2}{3}\\sqrt{x^3+2}\\right]_{${uaOrig}}^{${ubOrig}}
+       = \\frac{2}{3}\\left(\\sqrt{${U(parseFloat(sliderB.value)).toFixed(3)}} - \\sqrt{${U(parseFloat(sliderA.value)).toFixed(3)}}\\right)
+       = ${valorIntegral.toFixed(4)}`
+    );
+
+    // Área numérica en u para comprobar
+    const Iu = F(uMax) - F(uMin);
+    const signo = inverso ? -1 : 1;
+
+    divComprobacion.innerHTML =
+      `Área en x: <strong>${(signo * valorIntegral).toFixed(4)}</strong> &nbsp;|&nbsp; ` +
+      `Área en u: <strong>${(signo * Iu).toFixed(4)}</strong> &nbsp;→&nbsp; ` +
+      `<span style="color:#3ddc97">¡Son iguales! El área se conserva.</span>`;
+  }
+
+  // ---------- Eventos ----------
+  sliderA.addEventListener("input", () => {
+    // Evita que a supere a b en la visualización
+    dibujarGraficas();
+  });
+  sliderB.addEventListener("input", () => {
+    dibujarGraficas();
+  });
+
+  // ---------- Render inicial ----------
+  // KaTeX para la sección teórica y ejemplos
+  document.addEventListener("DOMContentLoaded", () => {
+    if (window.renderMathInElement) {
+      renderMathInElement(document.body, {
+        delimiters: [
+          { left: "\\(", right: "\\)", display: false },
+          { left: "\\[", right: "\\]", display: true }
+        ],
+        throwOnError: false
+      });
+    }
+    dibujarGraficas();
+  });
+</script>
+
+<!-- Auto-render de KaTeX para el texto de las secciones -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+
 </body>
 </html>
