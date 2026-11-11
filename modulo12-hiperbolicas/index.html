@@ -1,23 +1,659 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Módulo 7 - Próximamente</title>
-    <style>
-        body { font-family: sans-serif; background: #1e3c72; color: white; display: flex; justify-content: center; align-items: center; min-height: 100vh; text-align: center; }
-        .container { padding: 40px; }
-        h1 { font-size: 3em; margin-bottom: 20px; }
-        p { font-size: 1.3em; margin-bottom: 30px; }
-        a { color: #ffd700; text-decoration: none; font-size: 1.2em; }
-        a:hover { text-decoration: underline; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Módulo 12: Integrales que Conducen a Hiperbólicas Inversas</title>
+
+<!-- KaTeX (CSS, núcleo y auto-render) -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+
+<!-- Plotly.js -->
+<script defer src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --azul-1: #0b1d3a;
+    --azul-2: #13315c;
+    --azul-3: #1e4a80;
+    --acento-azul: #4da3ff;
+    --acento-verde: #3ddc97;
+    --naranja: #ff9f1c;
+    --purpura: #b57bff;
+    --texto-suave: rgba(255, 255, 255, 0.78);
+    --vidrio: rgba(255, 255, 255, 0.08);
+    --vidrio-borde: rgba(255, 255, 255, 0.18);
+  }
+
+  body {
+    font-family: "Segoe UI", Roboto, Arial, sans-serif;
+    color: #ffffff;
+    background: linear-gradient(135deg, var(--azul-1) 0%, var(--azul-2) 50%, var(--azul-3) 100%);
+    background-attachment: fixed;
+    min-height: 100vh;
+    line-height: 1.6;
+    padding: 90px 20px 40px;
+  }
+
+  .btn-volver {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    z-index: 1000;
+    padding: 10px 18px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.12);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid var(--vidrio-borde);
+    color: #fff;
+    text-decoration: none;
+    font-weight: 600;
+  }
+  .btn-volver:hover { background: rgba(255, 255, 255, 0.22); }
+
+  header { text-align: center; margin-bottom: 40px; }
+  header h1 { font-size: 2.2rem; margin-bottom: 8px; }
+  header p { color: var(--texto-suave); }
+
+  .card {
+    max-width: 1100px;
+    margin: 0 auto 30px;
+    padding: 28px 32px;
+    background: var(--vidrio);
+    border: 1px solid var(--vidrio-borde);
+    border-radius: 20px;
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+  }
+  .card h2 {
+    font-size: 1.6rem;
+    margin-bottom: 14px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--vidrio-borde);
+  }
+  .card h3 { font-size: 1.2rem; margin: 22px 0 10px; color: var(--acento-azul); }
+  .card p { margin-bottom: 12px; color: var(--texto-suave); }
+  .card strong { color: #fff; }
+
+  .formula-destacada {
+    text-align: center;
+    background: rgba(0, 0, 0, 0.25);
+    border-radius: 14px;
+    padding: 16px;
+    margin: 14px 0;
+    overflow-x: auto;
+    font-size: 1.15rem;
+  }
+
+  .nota {
+    background: rgba(61, 220, 151, 0.12);
+    border-left: 4px solid var(--acento-verde);
+    padding: 12px 16px;
+    border-radius: 10px;
+    margin: 14px 0;
+    color: var(--texto-suave);
+  }
+
+  .controles {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 14px;
+    padding: 20px;
+    margin-bottom: 22px;
+  }
+  .control-fila {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 12px;
+  }
+  .control-fila label { min-width: 150px; font-weight: 600; font-size: 1.02rem; }
+  .control-fila input[type="range"] { flex: 1; min-width: 180px; accent-color: var(--naranja); }
+  .control-fila select {
+    flex: 1;
+    min-width: 220px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: 1px solid var(--vidrio-borde);
+    background: rgba(255, 255, 255, 0.12);
+    color: #fff;
+    font-size: 1rem;
+    cursor: pointer;
+  }
+  .control-fila select option { background: #13315c; color: #fff; }
+  .valor {
+    font-family: Consolas, monospace;
+    background: rgba(255, 255, 255, 0.12);
+    padding: 4px 10px;
+    border-radius: 8px;
+    min-width: 70px;
+    text-align: center;
+  }
+
+  .grafica-caja { background: rgba(0, 0, 0, 0.2); border-radius: 14px; padding: 10px; }
+  #grafica { width: 100%; height: 420px; }
+
+  .resultados {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+    margin-top: 22px;
+  }
+  .panel { background: rgba(0, 0, 0, 0.2); border-radius: 14px; padding: 18px; }
+  .panel h4 { margin-bottom: 10px; color: var(--acento-azul); }
+  .panel.naranja h4 { color: var(--naranja); }
+  .panel .salida { overflow-x: auto; font-size: 1.15rem; }
+
+  .valor-grande {
+    text-align: center;
+    font-size: 1.4rem;
+    margin-top: 16px;
+    padding: 16px;
+    background: rgba(255, 159, 28, 0.1);
+    border: 1px solid rgba(255, 159, 28, 0.4);
+    border-radius: 14px;
+  }
+  .aviso { color: #ffd166; font-size: 1rem; margin-top: 8px; }
+  .error-cdn { color: #ff8a8a; font-weight: 600; }
+
+  .ejemplo-titulo { font-size: 1.3rem; color: var(--acento-verde); margin-bottom: 12px; }
+  .bloque-paso {
+    background: rgba(0, 0, 0, 0.22);
+    border-radius: 14px;
+    padding: 16px 20px;
+    margin: 14px 0;
+    overflow-x: auto;
+  }
+  .bloque-paso .titulo-paso { font-weight: 700; color: var(--acento-azul); margin-bottom: 6px; }
+  .bloque-paso .explica { color: var(--texto-suave); font-size: 0.97rem; margin-top: 8px; }
+  .resultado-final {
+    text-align: center;
+    background: rgba(61, 220, 151, 0.15);
+    border: 1px solid rgba(61, 220, 151, 0.4);
+    border-radius: 14px;
+    padding: 16px;
+    margin-top: 16px;
+    font-size: 1.1rem;
+  }
+
+  footer { text-align: center; color: var(--texto-suave); font-size: 0.9rem; margin-top: 20px; }
+
+  @media (max-width: 800px) {
+    #grafica { height: 300px; }
+    header h1 { font-size: 1.7rem; }
+    .card { padding: 20px; }
+    .resultados { grid-template-columns: 1fr; }
+    .control-fila label { min-width: 100%; }
+    body { padding: 80px 12px 30px; }
+  }
+</style>
 </head>
 <body>
-    <div class="container">
-        <h1>🚧 Próximamente</h1>
-        <p>Este módulo estará disponible en la <strong>Fase 2</strong> del proyecto.</p>
-        <a href="../index.html">← Volver al menú principal</a>
+
+<a href="../index.html" class="btn-volver">← Volver al menú</a>
+
+<header>
+  <h1>Módulo 12: Integrales que Conducen a Hiperbólicas Inversas</h1>
+  <p>Teoría, laboratorio interactivo y ejemplos resueltos</p>
+</header>
+
+<!-- ================= SECCIÓN 1: TEORÍA ================= -->
+<section class="card" id="seccion-teoria">
+  <h2>Sección 1: Teoría y Fórmulas Básicas</h2>
+
+  <p>
+    Las integrales de la forma \(\int \frac{du}{\sqrt{u^2 \pm a^2}}\) no se resuelven con funciones trigonométricas
+    inversas, sino con las <strong>funciones hiperbólicas inversas</strong>. Estas funciones se definen mediante
+    logaritmos naturales, así que el resultado final se escribe siempre como un logaritmo.
+  </p>
+
+  <h3>Caso suma</h3>
+  <div class="formula-destacada">
+    \(\int \frac{du}{\sqrt{u^2 + a^2}} = \ln\left(u + \sqrt{u^2 + a^2}\right) + C \qquad (\text{equivale a } \operatorname{arsinh}(u/a) + C)\)
+  </div>
+
+  <h3>Caso resta</h3>
+  <div class="formula-destacada">
+    \(\int \frac{du}{\sqrt{u^2 - a^2}} = \ln\left(u + \sqrt{u^2 - a^2}\right) + C \qquad (u > a,\ \text{equivale a } \operatorname{arcosh}(u/a) + C)\)
+  </div>
+
+  <h3>Diferencia geométrica</h3>
+  <p>
+    La ecuación \(y^2 - x^2 = a^2\) (caso resta) describe una hipérbola que abre <strong>hacia arriba y hacia abajo</strong>.
+    La ecuación \(x^2 - y^2 = a^2\) describe una hipérbola que abre <strong>hacia los lados</strong>. Las integrales
+    de la forma \(\frac{1}{\sqrt{u^2 \pm a^2}}\) aparecen al parametrizar estas curvas, y por eso sus primitivas son
+    funciones hiperbólicas inversas.
+  </p>
+
+  <div class="nota">
+    <strong>Regla práctica:</strong> si el signo bajo la raíz es <em>+</em>, usa la fórmula de la suma (sin restricción
+    en \(u\)). Si es <em>−</em>, usa la fórmula de la resta y recuerda que el dominio exige \(|u| > a\).
+  </div>
+</section>
+
+<!-- ================= SECCIÓN 2: LABORATORIO ================= -->
+<section class="card" id="seccion-laboratorio">
+  <h2>Sección 2: Laboratorio Interactivo</h2>
+
+  <p>
+    Elige el caso, ajusta <em>a</em> y los límites <em>b</em> y <em>c</em>. El área sombreada es
+    \(\int_b^c f(x)\,dx = F(c) - F(b)\), calculada con la antiderivada exacta.
+  </p>
+
+  <div class="controles">
+    <div class="control-fila">
+      <label for="select-caso">Caso:</label>
+      <select id="select-caso">
+        <option value="suma">Suma: f(x) = 1/√(x² + a²)</option>
+        <option value="resta">Resta: f(x) = 1/√(x² − a²)</option>
+      </select>
     </div>
+    <div class="control-fila">
+      <label for="slider-a">Constante a =</label>
+      <input type="range" id="slider-a" min="1" max="5" step="0.1" value="2">
+      <span class="valor" id="valor-a">2.0</span>
+    </div>
+    <div class="control-fila">
+      <label for="slider-b">Límite inferior b =</label>
+      <input type="range" id="slider-b" min="-6" max="6" step="0.1" value="-3">
+      <span class="valor" id="valor-b">-3.0</span>
+    </div>
+    <div class="control-fila">
+      <label for="slider-c">Límite superior c =</label>
+      <input type="range" id="slider-c" min="-6" max="6" step="0.1" value="3">
+      <span class="valor" id="valor-c">3.0</span>
+    </div>
+    <p class="aviso" id="aviso" style="display:none;"></p>
+  </div>
+
+  <div class="grafica-caja">
+    <div id="grafica"></div>
+  </div>
+
+  <div class="resultados">
+    <div class="panel">
+      <h4>Antiderivada F(x) con el valor actual de a</h4>
+      <div class="salida" id="salida-antiderivada"></div>
+    </div>
+    <div class="panel naranja">
+      <h4>Integral definida F(c) − F(b)</h4>
+      <div class="salida" id="salida-integral"></div>
+    </div>
+  </div>
+
+  <div class="valor-grande" id="area-numerica"></div>
+</section>
+
+<!-- ================= SECCIÓN 3: EJEMPLOS ================= -->
+<section class="card" id="seccion-ejemplos">
+  <h2>Sección 3: Ejemplos Resueltos Paso a Paso</h2>
+
+  <!-- EJEMPLO 1 -->
+  <div id="ejemplo-1">
+    <h3 class="ejemplo-titulo">Ejemplo 1: \(\int \frac{dx}{\sqrt{x^2 + 16}}\)</h3>
+
+    <div class="bloque-paso">
+      <div class="titulo-paso">Paso 1: Identificar a</div>
+      <div>\(x^2 + 16 = x^2 + a^2 \quad \Rightarrow \quad a^2 = 16 \quad \Rightarrow \quad a = 4\)</div>
+      <div class="explica">
+        Comparamos \(x^2 + 16\) con la forma \(u^2 + a^2\) de la fórmula de la suma. Con \(u = x\), el término constante
+        es \(a^2 = 16\), así que \(a = \sqrt{16} = 4\).
+      </div>
+    </div>
+
+    <div class="bloque-paso">
+      <div class="titulo-paso">Paso 2: Aplicar la fórmula de la suma</div>
+      <div>\(\int \frac{du}{\sqrt{u^2 + a^2}} = \ln\left(u + \sqrt{u^2 + a^2}\right) + C\)</div>
+      <div class="explica">
+        Como \(u = x\) ya tiene \(du = dx\), no hace falta ningún factor adicional. Sustituimos \(a = 4\) directamente en la fórmula.
+      </div>
+    </div>
+
+    <div class="bloque-paso">
+      <div class="titulo-paso">Paso 3: Resultado final</div>
+      <div>\(\int \frac{dx}{\sqrt{x^2 + 16}} = \ln\left(x + \sqrt{x^2 + 16}\right) + C\)</div>
+    </div>
+
+    <div class="resultado-final">
+      <strong>Comprobación:</strong> \(\frac{d}{dx}\ln\left(x+\sqrt{x^2+16}\right) = \frac{1}{x+\sqrt{x^2+16}}\left(1 + \frac{x}{\sqrt{x^2+16}}\right) = \frac{1}{\sqrt{x^2+16}}\) ✔
+    </div>
+  </div>
+
+  <!-- EJEMPLO 2 -->
+  <div id="ejemplo-2" style="margin-top: 40px;">
+    <h3 class="ejemplo-titulo">Ejemplo 2: \(\int \frac{dx}{\sqrt{4x^2 - 25}}\)</h3>
+
+    <div class="bloque-paso">
+      <div class="titulo-paso">Paso 1: Factorizar el 4 dentro de la raíz</div>
+      <div>\(\sqrt{4x^2 - 25} = \sqrt{4\left(x^2 - \tfrac{25}{4}\right)} = 2\sqrt{x^2 - \left(\tfrac{5}{2}\right)^2}\)</div>
+      <div class="explica">
+        Sacamos el 4 como factor común. Como \(\sqrt{4} = 2\), esa raíz sale de la raíz como 2. Además,
+        \(\frac{25}{4} = \left(\frac{5}{2}\right)^2\), así que identificamos \(a = \frac{5}{2}\).
+      </div>
+    </div>
+
+    <div class="bloque-paso">
+      <div class="titulo-paso">Paso 2: Sacar el factor 1/2 de la integral</div>
+      <div>\(\int \frac{dx}{\sqrt{4x^2-25}} = \int \frac{dx}{2\sqrt{x^2 - \left(\tfrac52\right)^2}} = \frac{1}{2}\int \frac{dx}{\sqrt{x^2 - a^2}}\)</div>
+      <div class="explica">
+        El \(\frac{1}{2}\) viene del 2 que quedó en el denominador. Como es una constante, sale de la integral.
+      </div>
+    </div>
+
+    <div class="bloque-paso">
+      <div class="titulo-paso">Paso 3: Aplicar la fórmula de la resta</div>
+      <div>\(\frac{1}{2}\int \frac{dx}{\sqrt{x^2 - a^2}} = \frac{1}{2}\ln\left(x + \sqrt{x^2 - \tfrac{25}{4}}\right) + C\)</div>
+      <div class="explica">
+        Aplicamos \(\int \frac{du}{\sqrt{u^2 - a^2}} = \ln\left(u + \sqrt{u^2 - a^2}\right) + C\) con \(u = x\) y \(a = \tfrac52\).
+        Para dejarlo sin fracciones dentro de la raíz, multiplicamos dentro del logaritmo por 2:
+        \(\ln\left(x + \sqrt{x^2 - \tfrac{25}{4}}\right) = \ln\left(\tfrac{1}{2}\left(2x + \sqrt{4x^2 - 25}\right)\right)\).
+      </div>
+    </div>
+
+    <div class="bloque-paso">
+      <div class="titulo-paso">Paso 4: Simplificar el logaritmo</div>
+      <div>\(\frac{1}{2}\ln\left(\tfrac{1}{2}\left(2x + \sqrt{4x^2-25}\right)\right) = \frac{1}{2}\ln\left(2x + \sqrt{4x^2-25}\right) - \frac{1}{2}\ln 2\)</div>
+      <div class="explica">
+        Usamos \(\ln\left(\frac{M}{N}\right) = \ln M - \ln N\). La constante \(-\frac{1}{2}\ln 2\) se absorbe en \(C\),
+        así que el resultado final es \(\frac{1}{2}\ln\left|2x + \sqrt{4x^2-25}\right| + C\).
+      </div>
+    </div>
+
+    <div class="resultado-final">
+      <strong>Resultado:</strong> \(\int \frac{dx}{\sqrt{4x^2-25}} = \frac{1}{2}\ln\left|2x + \sqrt{4x^2-25}\right| + C\)
+    </div>
+  </div>
+
+  <!-- EJEMPLO 3 -->
+  <div id="ejemplo-3" style="margin-top: 40px;">
+    <h3 class="ejemplo-titulo">Ejemplo 3: \(\int \frac{x+2}{\sqrt{x^2 + 9}}\,dx\)</h3>
+
+    <div class="bloque-paso">
+      <div class="titulo-paso">Paso 1: Separar la integral en dos</div>
+      <div>\(\int \frac{x+2}{\sqrt{x^2+9}}\,dx = \int \frac{x}{\sqrt{x^2+9}}\,dx + 2\int \frac{dx}{\sqrt{x^2+9}}\)</div>
+      <div class="explica">
+        Repartimos el numerador \(x + 2\) entre los dos términos de la fracción. El factor 2 de la segunda integral
+        sale de la integral por ser constante.
+      </div>
+    </div>
+
+    <div class="bloque-paso">
+      <div class="titulo-paso">Paso 2: Primera integral con sustitución \(u = x^2 + 9\)</div>
+      <div>\(u = x^2 + 9 \quad \Rightarrow \quad du = 2x\,dx \quad \Rightarrow \quad x\,dx = \frac{du}{2}\)</div>
+      <div>\(\int \frac{x}{\sqrt{x^2+9}}\,dx = \int \frac{1}{\sqrt{u}}\cdot\frac{du}{2} = \frac{1}{2}\int u^{-1/2}\,du\)</div>
+      <div>\(= \frac{1}{2}\cdot\frac{u^{1/2}}{\tfrac12} + C_1 = u^{1/2} + C_1 = \sqrt{x^2+9} + C_1\)</div>
+      <div class="explica">
+        El \(\frac{1}{2}\) aparece porque \(du = 2x\,dx\). Usamos \(\int u^n\,du = \frac{u^{n+1}}{n+1}+C\) con
+        \(n = -\tfrac12\), así que \(n+1 = \tfrac12\). Dividir entre \(\tfrac12\) multiplica por 2, y ese 2 cancela el \(\tfrac12\).
+      </div>
+    </div>
+
+    <div class="bloque-paso">
+      <div class="titulo-paso">Paso 3: Segunda integral con la fórmula hiperbólica (a = 3)</div>
+      <div>\(2\int \frac{dx}{\sqrt{x^2+9}} = 2\ln\left(x + \sqrt{x^2+9}\right) + C_2\)</div>
+      <div class="explica">
+        Aplicamos la fórmula de la suma con \(a^2 = 9\), así que \(a = 3\). El factor 2 se mantiene multiplicando.
+      </div>
+    </div>
+
+    <div class="bloque-paso">
+      <div class="titulo-paso">Paso 4: Combinar los resultados</div>
+      <div>\(\int \frac{x+2}{\sqrt{x^2+9}}\,dx = \sqrt{x^2+9} + 2\ln\left(x+\sqrt{x^2+9}\right) + C\)</div>
+      <div class="explica">Las constantes \(C_1\) y \(C_2\) se agrupan en una sola constante \(C\).</div>
+    </div>
+
+    <div class="resultado-final">
+      <strong>Comprobación:</strong> \(\frac{d}{dx}\sqrt{x^2+9} = \frac{x}{\sqrt{x^2+9}}\) y \(\frac{d}{dx}\,2\ln\left(x+\sqrt{x^2+9}\right) = \frac{2}{\sqrt{x^2+9}}\). Su suma es \(\frac{x+2}{\sqrt{x^2+9}}\) ✔
+    </div>
+  </div>
+</section>
+
+<footer>Módulo 12 · Cálculo Integral</footer>
+
+<script>
+  // ---------- Configuración de cada caso ----------
+  // Suma:  f(x) = 1/√(x²+a²),  F(x) = ln(x + √(x²+a²))
+  // Resta: f(x) = 1/√(x²−a²),  F(x) = ln|x + √(x²−a²)|  (solo |x| > a)
+  const CASOS = {
+    suma: {
+      f: (x, a) => 1 / Math.sqrt(x * x + a * a),
+      F: (x, a) => Math.log(x + Math.sqrt(x * x + a * a)),
+      latexf: (a) => `\\frac{1}{\\sqrt{x^2 + ${a.toFixed(1)}^2}}`,
+      latexF: (a) => `\\ln\\left(x + \\sqrt{x^2 + ${a.toFixed(1)}^2}\\right)`,
+      xRango: [-6, 6],
+      yRango: [0, 1.2],
+      // Dominio: todo x
+      ramas: [[-6, 6]],
+      rangoB: [-6, 6],
+      iniB: -3, iniC: 3
+    },
+    resta: {
+      f: (x, a) => 1 / Math.sqrt(x * x - a * a),
+      F: (x, a) => Math.log(Math.abs(x + Math.sqrt(x * x - a * a))),
+      latexf: (a) => `\\frac{1}{\\sqrt{x^2 - ${a.toFixed(1)}^2}}`,
+      latexF: (a) => `\\ln\\left|x + \\sqrt{x^2 - ${a.toFixed(1)}^2}\\right|`,
+      xRango: [-6, 6],
+      yRango: [0, 2],
+      // Dominio: |x| > a, dos ramas
+      ramas: null,
+      rangoB: [-6, 6],
+      iniB: -5, iniC: -3
+    }
+  };
+
+  // ---------- Elementos ----------
+  const selectCaso = document.getElementById("select-caso");
+  const sliderA = document.getElementById("slider-a");
+  const sliderB = document.getElementById("slider-b");
+  const sliderC = document.getElementById("slider-c");
+  const valorA = document.getElementById("valor-a");
+  const valorB = document.getElementById("valor-b");
+  const valorC = document.getElementById("valor-c");
+  const aviso = document.getElementById("aviso");
+  const salidaAntiderivada = document.getElementById("salida-antiderivada");
+  const salidaIntegral = document.getElementById("salida-integral");
+  const areaNumerica = document.getElementById("area-numerica");
+
+  // ---------- Utilidades ----------
+  function tex(elemento, latex) {
+    if (window.katex) {
+      katex.render(latex, elemento, { throwOnError: false, displayMode: true });
+    } else {
+      elemento.textContent = latex;
+    }
+  }
+
+  function puntos(fn, desde, hasta, n = 300) {
+    const xs = [], ys = [];
+    for (let i = 0; i <= n; i++) {
+      const t = desde + (hasta - desde) * i / n;
+      xs.push(t);
+      ys.push(fn(t));
+    }
+    return { xs, ys };
+  }
+
+  // Divide un intervalo en tramos válidos (sin NaN) para la función
+  function tramosValidos(fn, desde, hasta, n = 400) {
+    const tramos = [];
+    let actual = null;
+    for (let i = 0; i <= n; i++) {
+      const t = desde + (hasta - desde) * i / n;
+      const y = fn(t);
+      if (Number.isFinite(y)) {
+        if (!actual) actual = { xs: [], ys: [] };
+        actual.xs.push(t);
+        actual.ys.push(y);
+      } else if (actual) {
+        tramos.push(actual);
+        actual = null;
+      }
+    }
+    if (actual) tramos.push(actual);
+    return tramos;
+  }
+
+  const layoutBase = {
+    paper_bgcolor: "rgba(0,0,0,0)",
+    plot_bgcolor: "rgba(0,0,0,0)",
+    font: { color: "#ffffff" },
+    margin: { l: 55, r: 25, t: 20, b: 50 },
+    showlegend: false,
+    xaxis: { gridcolor: "rgba(255,255,255,0.12)", zerolinecolor: "rgba(255,255,255,0.4)" },
+    yaxis: { gridcolor: "rgba(255,255,255,0.12)", zerolinecolor: "rgba(255,255,255,0.4)" }
+  };
+  const config = { responsive: true, displayModeBar: false };
+
+  // ---------- Configurar sliders según el caso ----------
+  function configurarCaso() {
+    const c = CASOS[selectCaso.value];
+    sliderB.min = c.rangoB[0];
+    sliderB.max = c.rangoB[1];
+    sliderC.min = c.rangoB[0];
+    sliderC.max = c.rangoB[1];
+    sliderB.value = c.iniB;
+    sliderC.value = c.iniC;
+    actualizar();
+  }
+
+  // ---------- Dibujo y cálculos ----------
+  function actualizar() {
+    const clave = selectCaso.value;
+    const c = CASOS[clave];
+
+    const a = parseFloat(sliderA.value);
+    let b = parseFloat(sliderB.value);
+    let cc = parseFloat(sliderC.value);
+
+    valorA.textContent = a.toFixed(1);
+    valorB.textContent = b.toFixed(1);
+    valorC.textContent = cc.toFixed(1);
+
+    // Restricción c > b: si no se cumple, se ajusta c y se avisa
+    aviso.style.display = "none";
+    aviso.textContent = "";
+    if (cc <= b) {
+      cc = Math.min(b + 0.1, parseFloat(sliderC.max));
+      if (cc <= b) { b = cc - 0.1; sliderB.value = b.toFixed(1); }
+      sliderC.value = cc.toFixed(1);
+      valorB.textContent = b.toFixed(1);
+      valorC.textContent = cc.toFixed(1);
+      aviso.style.display = "block";
+      aviso.textContent = "El límite superior c debe ser mayor que b; se ajustó automáticamente.";
+    }
+
+    // Caso resta: el intervalo no puede cruzar la zona prohibida (-a, a)
+    const cruzaProhibida = clave === "resta" && (b < a && cc > -a);
+    if (cruzaProhibida) {
+      aviso.style.display = "block";
+      aviso.textContent = `En el caso resta no existe la función en (−${a.toFixed(1)}, ${a.toFixed(1)}). El intervalo [b, c] no es válido.`;
+    }
+
+    // ----- Gráfica -----
+    let trazasCurva, trazaSombra;
+    const fn = x => c.f(x, a);
+
+    if (clave === "suma") {
+      const curva = puntos(fn, -6, 6, 400);
+      const sombra = puntos(fn, b, cc, 200);
+      trazasCurva = [{ x: curva.xs, y: curva.ys, mode: "lines",
+        line: { color: "#ffffff", width: 2.5 }, hoverinfo: "skip" }];
+      trazaSombra = { x: sombra.xs, y: sombra.ys, mode: "lines", fill: "tozeroy",
+        fillcolor: "rgba(255,159,28,0.5)", line: { color: "#ff9f1c", width: 1.5 }, hoverinfo: "skip" };
+    } else {
+      // Dos ramas: x > a y x < -a. Se dibujan por separado para no unir la curva a través de la zona prohibida.
+      const ramaDer = tramosValidos(fn, a + 0.001, 6, 400);
+      const ramaIzq = tramosValidos(fn, -6, -a - 0.001, 400);
+      trazasCurva = [...ramaDer, ...ramaIzq].map(t => ({
+        x: t.xs, y: t.ys, mode: "lines", line: { color: "#ffffff", width: 2.5 }, hoverinfo: "skip"
+      }));
+      // Sombra solo en el tramo válido [b, c] (si no está dentro de la zona prohibida)
+      const sombraTramos = tramosValidos(fn, Math.min(b, cc), Math.max(b, cc), 300);
+      trazaSombra = sombraTramos.map(t => ({
+        x: t.xs, y: t.ys, mode: "lines", fill: "tozeroy",
+        fillcolor: "rgba(255,159,28,0.5)", line: { color: "#ff9f1c", width: 1.5 }, hoverinfo: "skip"
+      }));
+    }
+
+    const trazas = Array.isArray(trazaSombra) ? [...trazasCurva, ...trazaSombra] : [...trazasCurva, trazaSombra];
+
+    // Líneas punteadas en b y c
+    const shapes = [
+      { type: "line", x0: b, x1: b, y0: c.yRango[0], y1: c.yRango[1], line: { color: "#b57bff", dash: "dot", width: 1.5 } },
+      { type: "line", x0: cc, x1: cc, y0: c.yRango[0], y1: c.yRango[1], line: { color: "#b57bff", dash: "dot", width: 1.5 } }
+    ];
+
+    Plotly.react("grafica", trazas, {
+      ...layoutBase,
+      xaxis: { ...layoutBase.xaxis, title: "x", range: c.xRango },
+      yaxis: { ...layoutBase.yaxis, title: "f(x)", range: c.yRango },
+      shapes
+    }, config);
+
+    // ----- Antiderivada -----
+    tex(salidaAntiderivada, `\\int ${c.latexf(a)}\\,dx = ${c.latexF(a)} + C`);
+
+    // ----- Integral definida -----
+    const invalido = clave === "resta" && (
+      (Math.min(b, cc) < a && Math.max(b, cc) > -a) ||
+      (Math.min(b, cc) <= a && Math.max(b, cc) >= -a && Math.min(b, cc) < a && Math.max(b, cc) > -a)
+    );
+
+    // Caso válido: ambos extremos en el mismo lado de la zona prohibida
+    const zonaProhibida = clave === "resta" && Math.min(b, cc) > -a && Math.max(b, cc) < a;
+    const cruza = clave === "resta" && Math.min(b, cc) < -a && Math.max(b, cc) > a;
+    const extremoEnZona = clave === "resta" && (
+      (Math.abs(b) <= a) || (Math.abs(cc) <= a)
+    );
+
+    if (extremoEnZona || cruza || zonaProhibida) {
+      tex(salidaIntegral, `\\text{La integral no existe en este intervalo}`);
+      areaNumerica.innerHTML =
+        `<span style="color:#ffd166">Los límites caen dentro de la zona donde \\(x^2 - a^2 < 0\\). Mueve b o c fuera de (−a, a).</span>`;
+      return;
+    }
+
+    const valorF = c.F(cc, a) - c.F(b, a);
+
+    tex(salidaIntegral,
+      `\\int_{${b.toFixed(1)}}^{${cc.toFixed(1)}} ${c.latexf(a)}\\,dx
+       = \\left[${c.latexF(a)}\\right]_{${b.toFixed(1)}}^{${cc.toFixed(1)}}
+       = ${valorF.toFixed(4)}`);
+
+    areaNumerica.innerHTML =
+      `Valor del área (integral definida): <strong>${valorF.toFixed(4)}</strong>`;
+  }
+
+  // ---------- Arranque ----------
+  window.addEventListener("load", () => {
+    if (window.renderMathInElement) {
+      renderMathInElement(document.body, {
+        delimiters: [
+          { left: "\\(", right: "\\)", display: false },
+          { left: "\\[", right: "\\]", display: true }
+        ],
+        throwOnError: false
+      });
+    }
+
+    if (typeof Plotly === "undefined") {
+      document.getElementById("grafica").innerHTML =
+        '<p class="error-cdn">No se cargó Plotly. Revisa tu conexión a internet.</p>';
+    } else {
+      selectCaso.addEventListener("change", configurarCaso);
+      sliderA.addEventListener("input", actualizar);
+      sliderB.addEventListener("input", actualizar);
+      sliderC.addEventListener("input", actualizar);
+      configurarCaso();
+    }
+  });
+</script>
+
 </body>
 </html>
