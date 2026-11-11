@@ -1,23 +1,609 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Módulo 7 - Próximamente</title>
-    <style>
-        body { font-family: sans-serif; background: #1e3c72; color: white; display: flex; justify-content: center; align-items: center; min-height: 100vh; text-align: center; }
-        .container { padding: 40px; }
-        h1 { font-size: 3em; margin-bottom: 20px; }
-        p { font-size: 1.3em; margin-bottom: 30px; }
-        a { color: #ffd700; text-decoration: none; font-size: 1.2em; }
-        a:hover { text-decoration: underline; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Módulo 11: Integrales que Conducen a Trigonométricas Inversas</title>
+
+<!-- KaTeX (CSS, núcleo y auto-render) -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+
+<!-- Plotly.js -->
+<script defer src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --azul-1: #0b1d3a;
+    --azul-2: #13315c;
+    --azul-3: #1e4a80;
+    --acento-azul: #4da3ff;
+    --acento-verde: #3ddc97;
+    --cian: #00e5ff;
+    --rojo: #ff4d6d;
+    --texto-suave: rgba(255, 255, 255, 0.78);
+    --vidrio: rgba(255, 255, 255, 0.08);
+    --vidrio-borde: rgba(255, 255, 255, 0.18);
+  }
+
+  body {
+    font-family: "Segoe UI", Roboto, Arial, sans-serif;
+    color: #ffffff;
+    background: linear-gradient(135deg, var(--azul-1) 0%, var(--azul-2) 50%, var(--azul-3) 100%);
+    background-attachment: fixed;
+    min-height: 100vh;
+    line-height: 1.6;
+    padding: 90px 20px 40px;
+  }
+
+  .btn-volver {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    z-index: 1000;
+    padding: 10px 18px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.12);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid var(--vidrio-borde);
+    color: #fff;
+    text-decoration: none;
+    font-weight: 600;
+  }
+  .btn-volver:hover { background: rgba(255, 255, 255, 0.22); }
+
+  header { text-align: center; margin-bottom: 40px; }
+  header h1 { font-size: 2.2rem; margin-bottom: 8px; }
+  header p { color: var(--texto-suave); }
+
+  .card {
+    max-width: 1100px;
+    margin: 0 auto 30px;
+    padding: 28px 32px;
+    background: var(--vidrio);
+    border: 1px solid var(--vidrio-borde);
+    border-radius: 20px;
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+  }
+  .card h2 {
+    font-size: 1.6rem;
+    margin-bottom: 14px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--vidrio-borde);
+  }
+  .card h3 { font-size: 1.2rem; margin: 22px 0 10px; color: var(--acento-azul); }
+  .card p { margin-bottom: 12px; color: var(--texto-suave); }
+  .card strong { color: #fff; }
+
+  .formula-destacada {
+    text-align: center;
+    background: rgba(0, 0, 0, 0.25);
+    border-radius: 14px;
+    padding: 16px;
+    margin: 14px 0;
+    overflow-x: auto;
+    font-size: 1.15rem;
+  }
+
+  .nota {
+    background: rgba(61, 220, 151, 0.12);
+    border-left: 4px solid var(--acento-verde);
+    padding: 12px 16px;
+    border-radius: 10px;
+    margin: 14px 0;
+    color: var(--texto-suave);
+  }
+
+  .controles {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 14px;
+    padding: 20px;
+    margin-bottom: 22px;
+  }
+  .control-fila {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 12px;
+  }
+  .control-fila label { min-width: 110px; font-weight: 600; font-size: 1.02rem; }
+  .control-fila input[type="range"] { flex: 1; min-width: 180px; accent-color: var(--cian); }
+  .control-fila select {
+    flex: 1;
+    min-width: 220px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: 1px solid var(--vidrio-borde);
+    background: rgba(255, 255, 255, 0.12);
+    color: #fff;
+    font-size: 1rem;
+    cursor: pointer;
+  }
+  .control-fila select option { background: #13315c; color: #fff; }
+  .valor {
+    font-family: Consolas, monospace;
+    background: rgba(255, 255, 255, 0.12);
+    padding: 4px 10px;
+    border-radius: 8px;
+    min-width: 70px;
+    text-align: center;
+  }
+
+  .graficas { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  .grafica-caja { background: rgba(0, 0, 0, 0.2); border-radius: 14px; padding: 10px; }
+  .grafica-caja h4 { text-align: center; margin: 6px 0 4px; font-size: 1.05rem; }
+  .grafica { width: 100%; height: 380px; }
+
+  .resultados {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+    margin-top: 22px;
+  }
+  .panel { background: rgba(0, 0, 0, 0.2); border-radius: 14px; padding: 18px; }
+  .panel h4 { margin-bottom: 10px; color: var(--acento-azul); }
+  .panel.cian h4 { color: var(--cian); }
+  .panel .salida { overflow-x: auto; font-size: 1.1rem; }
+
+  .valor-grande {
+    text-align: center;
+    font-size: 1.4rem;
+    margin-top: 16px;
+    padding: 16px;
+    background: rgba(0, 229, 255, 0.1);
+    border: 1px solid rgba(0, 229, 255, 0.35);
+    border-radius: 14px;
+  }
+  .aviso { color: #ffd166; font-size: 0.98rem; margin-top: 8px; }
+  .error-cdn { color: #ff8a8a; font-weight: 600; }
+
+  .ejemplo-titulo { font-size: 1.3rem; color: var(--acento-verde); margin-bottom: 12px; }
+  .bloque-paso {
+    background: rgba(0, 0, 0, 0.22);
+    border-radius: 14px;
+    padding: 16px 20px;
+    margin: 14px 0;
+    overflow-x: auto;
+  }
+  .bloque-paso .titulo-paso { font-weight: 700; color: var(--acento-azul); margin-bottom: 6px; }
+  .bloque-paso .explica { color: var(--texto-suave); font-size: 0.97rem; margin-top: 8px; }
+  .resultado-final {
+    text-align: center;
+    background: rgba(61, 220, 151, 0.15);
+    border: 1px solid rgba(61, 220, 151, 0.4);
+    border-radius: 14px;
+    padding: 16px;
+    margin-top: 16px;
+    font-size: 1.1rem;
+  }
+
+  footer { text-align: center; color: var(--texto-suave); font-size: 0.9rem; margin-top: 20px; }
+
+  @media (max-width: 800px) {
+    .graficas, .resultados { grid-template-columns: 1fr; }
+    .grafica { height: 300px; }
+    header h1 { font-size: 1.7rem; }
+    .card { padding: 20px; }
+    .control-fila label { min-width: 100%; }
+    body { padding: 80px 12px 30px; }
+  }
+</style>
 </head>
 <body>
-    <div class="container">
-        <h1>🚧 Próximamente</h1>
-        <p>Este módulo estará disponible en la <strong>Fase 2</strong> del proyecto.</p>
-        <a href="../index.html">← Volver al menú principal</a>
+
+<a href="../index.html" class="btn-volver">← Volver al menú</a>
+
+<header>
+  <h1>Módulo 11: Integrales que Conducen a Trigonométricas Inversas</h1>
+  <p>Teoría, laboratorio interactivo y ejemplos resueltos</p>
+</header>
+
+<!-- ================= SECCIÓN 1: TEORÍA ================= -->
+<section class="card" id="seccion-teoria">
+  <h2>Sección 1: Teoría y Fórmulas Básicas</h2>
+
+  <p>
+    Algunas integrales de funciones algebraicas no se resuelven con potencias ni logaritmos, sino que dan
+    como resultado <strong>funciones trigonométricas inversas</strong>. Esto ocurre cuando el integrando
+    tiene la forma de una raíz en el denominador o de una suma de cuadrados. Las dos fórmulas de referencia son:
+  </p>
+
+  <div class="formula-destacada">
+    \(\int \frac{du}{\sqrt{1 - u^2}} = \arcsin u + C\)
+  </div>
+
+  <div class="formula-destacada">
+    \(\int \frac{du}{1 + u^2} = \arctan u + C\)
+  </div>
+
+  <p>
+    La primera corresponde a la derivada \(\frac{d}{du}\arcsin u = \frac{1}{\sqrt{1-u^2}}\), y la segunda a
+    \(\frac{d}{du}\arctan u = \frac{1}{1+u^2}\). Al integrar, simplemente leemos la derivada al revés.
+  </p>
+
+  <div class="nota">
+    <strong>Sustitución previa:</strong> casi nunca la integral aparece en la forma exacta de estas fórmulas.
+    Con frecuencia hay que <strong>completar el cuadrado</strong> en el polinomio bajo la raíz o en el denominador,
+    y después hacer una sustitución lineal \(u = \) (algo) para encajar en \(\sqrt{1-u^2}\) o en \(1+u^2\).
+    Los coeficientes que aparecen en el proceso salen de esa sustitución, y se estudian en la Sección 3.
+  </div>
+</section>
+
+<!-- ================= SECCIÓN 2: LABORATORIO ================= -->
+<section class="card" id="seccion-laboratorio">
+  <h2>Sección 2: Laboratorio Interactivo</h2>
+
+  <p>
+    Elige el caso y mueve los límites <em>a</em> y <em>b</em>. El área sombreada en el panel izquierdo es
+    \(\int_a^b f(x)\,dx = F(b) - F(a)\). En el panel derecho, la curva \(g(x)\) tiene la misma función que la
+    antiderivada, así que la diferencia de alturas \(g(b) - g(a)\) es exactamente ese mismo valor.
+  </p>
+
+  <div class="controles">
+    <div class="control-fila">
+      <label for="select-caso">Caso:</label>
+      <select id="select-caso">
+        <option value="arcsen">Arcoseno: f(x) = 1/√(1−x²)</option>
+        <option value="arctan">Arcotangente: f(x) = 1/(1+x²)</option>
+      </select>
     </div>
+    <div class="control-fila">
+      <label for="slider-a">Límite a =</label>
+      <input type="range" id="slider-a" min="-0.99" max="0.99" step="0.01" value="-0.5">
+      <span class="valor" id="valor-a">-0.50</span>
+    </div>
+    <div class="control-fila">
+      <label for="slider-b">Límite b =</label>
+      <input type="range" id="slider-b" min="-0.99" max="0.99" step="0.01" value="0.5">
+      <span class="valor" id="valor-b">0.50</span>
+    </div>
+    <p class="aviso" id="aviso" style="display:none;"></p>
+  </div>
+
+  <div class="graficas">
+    <div class="grafica-caja">
+      <h4>Panel izquierdo: f(x) (integranda)</h4>
+      <div id="grafica-izq" class="grafica"></div>
+    </div>
+    <div class="grafica-caja">
+      <h4>Panel derecho: g(x) (función arco)</h4>
+      <div id="grafica-der" class="grafica"></div>
+    </div>
+  </div>
+
+  <div class="resultados">
+    <div class="panel">
+      <h4>Antiderivada F(x)</h4>
+      <div class="salida" id="salida-antiderivada"></div>
+    </div>
+    <div class="panel cian">
+      <h4>Integral definida F(b) − F(a)</h4>
+      <div class="salida" id="salida-integral"></div>
+    </div>
+  </div>
+
+  <div class="valor-grande" id="area-numerica"></div>
+</section>
+
+<!-- ================= SECCIÓN 3: EJEMPLOS ================= -->
+<section class="card" id="seccion-ejemplos">
+  <h2>Sección 3: Ejemplos Resueltos Paso a Paso</h2>
+
+  <!-- EJEMPLO 1 -->
+  <div id="ejemplo-1">
+    <h3 class="ejemplo-titulo">Ejemplo 1: \(\int \frac{3+x}{\sqrt{1-x^2}}\,dx\)</h3>
+
+    <div class="bloque-paso">
+      <div class="titulo-paso">Paso 1: Separar la integral en dos</div>
+      <div>\(\int \frac{3+x}{\sqrt{1-x^2}}\,dx = \int \frac{3}{\sqrt{1-x^2}}\,dx + \int \frac{x}{\sqrt{1-x^2}}\,dx\)</div>
+      <div class="explica">
+        Usamos la linealidad de la integral: la integral de una suma es la suma de las integrales. El numerador
+        \(3 + x\) se reparte entre los dos términos de la fracción.
+      </div>
+    </div>
+
+    <div class="bloque-paso">
+      <div class="titulo-paso">Paso 2: Primera integral (forma de arcoseno)</div>
+      <div>\(\int \frac{3}{\sqrt{1-x^2}}\,dx = 3\int \frac{dx}{\sqrt{1-x^2}} = 3\arcsin x + C_1\)</div>
+      <div class="explica">
+        El factor 3 sale de la integral porque es constante. Luego aplicamos la fórmula
+        \(\int \frac{du}{\sqrt{1-u^2}} = \arcsin u + C\) con \(u = x\).
+      </div>
+    </div>
+
+    <div class="bloque-paso">
+      <div class="titulo-paso">Paso 3: Segunda integral (sustitución \(u = 1 - x^2\))</div>
+      <div>\(u = 1 - x^2 \quad \Rightarrow \quad du = -2x\,dx \quad \Rightarrow \quad x\,dx = -\frac{du}{2}\)</div>
+      <div>\(\int \frac{x}{\sqrt{1-x^2}}\,dx = \int \frac{1}{\sqrt{u}}\cdot\left(-\frac{du}{2}\right) = -\frac{1}{2}\int u^{-1/2}\,du\)</div>
+      <div>\(= -\frac{1}{2}\cdot\frac{u^{1/2}}{\tfrac12} + C_2 = -u^{1/2} + C_2 = -\sqrt{1-x^2} + C_2\)</div>
+      <div class="explica">
+        El \(-\frac{1}{2}\) aparece porque \(du = -2x\,dx\): al despejar \(x\,dx\) dividimos entre \(-2\).
+        Luego usamos \(\int u^n\,du = \frac{u^{n+1}}{n+1} + C\) con \(n = -\tfrac12\), así que \(n+1 = \tfrac12\).
+        Dividir entre \(\tfrac12\) multiplica por 2, y ese 2 se cancela con el \(-\tfrac12\) para dejar \(-1\).
+      </div>
+    </div>
+
+    <div class="bloque-paso">
+      <div class="titulo-paso">Paso 4: Sumar los resultados</div>
+      <div>\(\int \frac{3+x}{\sqrt{1-x^2}}\,dx = 3\arcsin x - \sqrt{1-x^2} + C\)</div>
+      <div class="explica">Las constantes \(C_1\) y \(C_2\) se agrupan en una sola constante \(C\).</div>
+    </div>
+
+    <div class="resultado-final">
+      <strong>Comprobación:</strong> \(\frac{d}{dx}\left(3\arcsin x - \sqrt{1-x^2}\right) = \frac{3}{\sqrt{1-x^2}} + \frac{x}{\sqrt{1-x^2}} = \frac{3+x}{\sqrt{1-x^2}}\) ✔
+    </div>
+  </div>
+
+  <!-- EJEMPLO 2 -->
+  <div id="ejemplo-2" style="margin-top: 40px;">
+    <h3 class="ejemplo-titulo">Ejemplo 2: \(\int \frac{dx}{\sqrt{4x - x^2}}\)</h3>
+
+    <div class="bloque-paso">
+      <div class="titulo-paso">Paso 1: Completar el cuadrado bajo la raíz</div>
+      <div>\(4x - x^2 = -(x^2 - 4x) = -\left[(x-2)^2 - 4\right] = 4 - (x-2)^2\)</div>
+      <div class="explica">
+        Sacamos el signo menos como factor común, completamos el cuadrado con \(\left(\frac{-4}{2}\right)^2 = 4\)
+        y sumamos y restamos ese 4 dentro del paréntesis. Al distribuir el signo menos, el \(-(-4) = +4\) queda
+        en la expresión final.
+      </div>
+    </div>
+
+    <div class="bloque-paso">
+      <div class="titulo-paso">Paso 2: Reescribir la integral</div>
+      <div>\(\int \frac{dx}{\sqrt{4 - (x-2)^2}}\)</div>
+      <div class="explica">Ahora la forma se parece a \(\frac{1}{\sqrt{a^2 - t^2}}\), con \(a = 2\) y \(t = x - 2\).</div>
+    </div>
+
+    <div class="bloque-paso">
+      <div class="titulo-paso">Paso 3: Sustitución \(u = \frac{x-2}{2}\)</div>
+      <div>\(u = \frac{x-2}{2} \quad \Rightarrow \quad du = \frac{dx}{2} \quad \Rightarrow \quad dx = 2\,du\)</div>
+      <div>\(\sqrt{4 - (x-2)^2} = \sqrt{4 - 4u^2} = 2\sqrt{1-u^2}\)</div>
+      <div>\(\int \frac{2\,du}{2\sqrt{1-u^2}} = \int \frac{du}{\sqrt{1-u^2}}\)</div>
+      <div class="explica">
+        Dividimos \(x - 2\) entre 2 para tener \(u\) con la forma \(1 - u^2\). Como \(x - 2 = 2u\), el denominador
+        queda \(2\sqrt{1-u^2}\). El factor 2 del \(dx = 2\,du\) se cancela con el 2 del denominador.
+      </div>
+    </div>
+
+    <div class="bloque-paso">
+      <div class="titulo-paso">Paso 4: Aplicar la fórmula del arcoseno y volver a x</div>
+      <div>\(\int \frac{du}{\sqrt{1-u^2}} = \arcsin u + C = \arcsin\left(\frac{x-2}{2}\right) + C\)</div>
+    </div>
+
+    <div class="resultado-final">
+      <strong>Comprobación:</strong> \(\frac{1}{\sqrt{1-\left(\frac{x-2}{2}\right)^2}}\cdot\frac{1}{2} = \frac{1}{\sqrt{4-(x-2)^2}} = \frac{1}{\sqrt{4x-x^2}}\) ✔
+    </div>
+  </div>
+
+  <!-- EJEMPLO 3 -->
+  <div id="ejemplo-3" style="margin-top: 40px;">
+    <h3 class="ejemplo-titulo">Ejemplo 3: \(\int \frac{dx}{x^2 + 6x + 10}\)</h3>
+
+    <div class="bloque-paso">
+      <div class="titulo-paso">Paso 1: Completar el cuadrado en el denominador</div>
+      <div>\(x^2 + 6x + 10 = (x^2 + 6x + 9) + 1 = (x+3)^2 + 1\)</div>
+      <div class="explica">
+        Tomamos la mitad de 6, que es 3, y lo elevamos al cuadrado: \(3^2 = 9\). Sumamos y restamos 9 para
+        formar el trinomio cuadrado perfecto.
+      </div>
+    </div>
+
+    <div class="bloque-paso">
+      <div class="titulo-paso">Paso 2: Sustitución \(u = x + 3\)</div>
+      <div>\(u = x + 3 \quad \Rightarrow \quad du = dx\)</div>
+      <div>\(\int \frac{dx}{(x+3)^2+1} = \int \frac{du}{u^2+1}\)</div>
+      <div class="explica">
+        Como \(du = dx\), no aparece ningún factor adicional. El denominador ya tiene la forma \(u^2 + 1\).
+      </div>
+    </div>
+
+    <div class="bloque-paso">
+      <div class="titulo-paso">Paso 3: Aplicar la fórmula del arcotangente y volver a x</div>
+      <div>\(\int \frac{du}{u^2+1} = \arctan u + C = \arctan(x+3) + C\)</div>
+    </div>
+
+    <div class="resultado-final">
+      <strong>Comprobación:</strong> \(\frac{d}{dx}\arctan(x+3) = \frac{1}{1+(x+3)^2} = \frac{1}{x^2+6x+10}\) ✔
+    </div>
+  </div>
+</section>
+
+<footer>Módulo 11 · Cálculo Integral</footer>
+
+<script>
+  // ---------- Configuración de cada caso ----------
+  const CASOS = {
+    arcsen: {
+      f: x => 1 / Math.sqrt(1 - x * x),
+      F: x => Math.asin(x),
+      g: x => Math.asin(x),
+      latexf: "\\frac{1}{\\sqrt{1-x^2}}",
+      latexF: "\\arcsin(x)",
+      min: -0.99, max: 0.99, paso: 0.01, ini: [-0.5, 0.5],
+      dominioCurva: [-0.995, 0.995],
+      xG: [-1.1, 1.1], yG: [-2, 2], xBarra: -1.02,
+      xF: [-1.1, 1.1], yF: [0, 8]
+    },
+    arctan: {
+      f: x => 1 / (1 + x * x),
+      F: x => Math.atan(x),
+      g: x => Math.atan(x),
+      latexf: "\\frac{1}{1+x^2}",
+      latexF: "\\arctan(x)",
+      min: -5, max: 5, paso: 0.1, ini: [-2, 2],
+      dominioCurva: [-5.5, 5.5],
+      xG: [-5.5, 5.5], yG: [-2, 2], xBarra: -5.2,
+      xF: [-5.5, 5.5], yF: [0, 1.2]
+    }
+  };
+
+  // ---------- Elementos ----------
+  const selectCaso = document.getElementById("select-caso");
+  const sliderA = document.getElementById("slider-a");
+  const sliderB = document.getElementById("slider-b");
+  const valorA = document.getElementById("valor-a");
+  const valorB = document.getElementById("valor-b");
+  const aviso = document.getElementById("aviso");
+  const salidaAntiderivada = document.getElementById("salida-antiderivada");
+  const salidaIntegral = document.getElementById("salida-integral");
+  const areaNumerica = document.getElementById("area-numerica");
+
+  // ---------- Utilidades ----------
+  function tex(elemento, latex) {
+    if (window.katex) {
+      katex.render(latex, elemento, { throwOnError: false, displayMode: true });
+    } else {
+      elemento.textContent = latex;
+    }
+  }
+
+  function puntos(fn, desde, hasta, n = 300) {
+    const xs = [], ys = [];
+    for (let i = 0; i <= n; i++) {
+      const t = desde + (hasta - desde) * i / n;
+      xs.push(t);
+      ys.push(fn(t));
+    }
+    return { xs, ys };
+  }
+
+  const layoutBase = {
+    paper_bgcolor: "rgba(0,0,0,0)",
+    plot_bgcolor: "rgba(0,0,0,0)",
+    font: { color: "#ffffff" },
+    margin: { l: 55, r: 25, t: 20, b: 50 },
+    showlegend: false,
+    xaxis: { gridcolor: "rgba(255,255,255,0.12)", zerolinecolor: "rgba(255,255,255,0.4)" },
+    yaxis: { gridcolor: "rgba(255,255,255,0.12)", zerolinecolor: "rgba(255,255,255,0.4)" }
+  };
+  const config = { responsive: true, displayModeBar: false };
+
+  // ---------- Cambiar de caso: reconfigura los sliders ----------
+  function configurarSliders() {
+    const c = CASOS[selectCaso.value];
+    for (const s of [sliderA, sliderB]) {
+      s.min = c.min;
+      s.max = c.max;
+      s.step = c.paso;
+    }
+    sliderA.value = c.ini[0];
+    sliderB.value = c.ini[1];
+    actualizar();
+  }
+
+  // ---------- Dibujo y cálculos ----------
+  function actualizar() {
+    const c = CASOS[selectCaso.value];
+
+    let a = parseFloat(sliderA.value);
+    let b = parseFloat(sliderB.value);
+    valorA.textContent = a.toFixed(2);
+    valorB.textContent = b.toFixed(2);
+
+    const invertido = a > b;
+    const lo = Math.min(a, b), hi = Math.max(a, b);
+
+    aviso.style.display = invertido ? "block" : "none";
+    aviso.textContent = invertido
+      ? "Nota: a > b. La integral cambia de signo; el área se dibuja sobre [b, a]."
+      : "";
+
+    // ----- Gráfica izquierda: f(x) con sombreado cian -----
+    const curvaF = puntos(c.f, c.dominioCurva[0], c.dominioCurva[1], 400);
+    const sombraF = puntos(c.f, lo, hi, 200);
+
+    Plotly.react("grafica-izq", [
+      { x: curvaF.xs, y: curvaF.ys, mode: "lines",
+        line: { color: "#ffffff", width: 2.5 }, hoverinfo: "skip" },
+      { x: sombraF.xs, y: sombraF.ys, mode: "lines", fill: "tozeroy",
+        fillcolor: "rgba(0,229,255,0.45)", line: { color: "#00e5ff", width: 1.5 }, hoverinfo: "skip" }
+    ], {
+      ...layoutBase,
+      xaxis: { ...layoutBase.xaxis, title: "x", range: c.xF },
+      yaxis: { ...layoutBase.yaxis, title: "f(x)", range: c.yF },
+      shapes: [
+        { type: "line", x0: lo, x1: lo, y0: c.yF[0], y1: c.yF[1], line: { color: "#ff4d6d", dash: "dot", width: 1.5 } },
+        { type: "line", x0: hi, x1: hi, y0: c.yF[0], y1: c.yF[1], line: { color: "#ff4d6d", dash: "dot", width: 1.5 } }
+      ]
+    }, config);
+
+    // ----- Gráfica derecha: g(x) con punto rojo y barra de altura = área -----
+    // El área es F(hi) - F(lo) = g(hi) - g(lo), así que la barra vertical de altura g(hi) - g(lo) es el área.
+    const curvaG = puntos(c.g, c.dominioCurva[0], c.dominioCurva[1], 400);
+    const yLo = c.g(lo), yHi = c.g(hi);
+    const xB = c.xBarra;
+    const area = c.F(hi) - c.F(lo);
+    const valorMostrado = invertido ? -area : area;
+
+    Plotly.react("grafica-der", [
+      { x: curvaG.xs, y: curvaG.ys, mode: "lines",
+        line: { color: "#ffffff", width: 2.5 }, hoverinfo: "skip" },
+      // Puntos rojos sobre la curva en a y b
+      { x: [lo, hi], y: [yLo, yHi], mode: "markers",
+        marker: { color: "#ff4d6d", size: 11, line: { color: "#ffffff", width: 1 } }, hoverinfo: "skip" },
+      // Líneas punteadas desde cada punto hasta la barra
+      { x: [lo, xB], y: [yLo, yLo], mode: "lines",
+        line: { color: "#ff4d6d", width: 1.5, dash: "dot" }, hoverinfo: "skip" },
+      { x: [hi, xB], y: [yHi, yHi], mode: "lines",
+        line: { color: "#ff4d6d", width: 1.5, dash: "dot" }, hoverinfo: "skip" },
+      // Barra roja de altura = área
+      { x: [xB, xB], y: [yLo, yHi], mode: "lines",
+        line: { color: "#ff4d6d", width: 5 }, hoverinfo: "skip" }
+    ], {
+      ...layoutBase,
+      xaxis: { ...layoutBase.xaxis, title: "x", range: c.xG },
+      yaxis: { ...layoutBase.yaxis, title: "g(x)", range: c.yG },
+      annotations: [{
+        x: xB, y: (yLo + yHi) / 2, xanchor: "left", showarrow: false,
+        text: `  Área = ${Math.abs(valorMostrado).toFixed(4)}`,
+        font: { color: "#ff4d6d", size: 13 }
+      }]
+    }, config);
+
+    // ----- Textos y fórmulas -----
+    tex(salidaAntiderivada, `F(x) = ${c.latexF} + C`);
+
+    tex(salidaIntegral,
+      `\\int_{${a.toFixed(2)}}^{${b.toFixed(2)}} ${c.latexf}\\,dx
+       = \\left[${c.latexF}\\right]_{${a.toFixed(2)}}^{${b.toFixed(2)}}
+       = ${valorMostrado.toFixed(4)}`);
+
+    areaNumerica.innerHTML =
+      `Valor del área (integral definida): <strong>${valorMostrado.toFixed(4)}</strong> ` +
+      `&nbsp;→&nbsp; <span style="color:#ff4d6d">igual a la altura de la barra roja</span>`;
+  }
+
+  // ---------- Arranque ----------
+  window.addEventListener("load", () => {
+    if (window.renderMathInElement) {
+      renderMathInElement(document.body, {
+        delimiters: [
+          { left: "\\(", right: "\\)", display: false },
+          { left: "\\[", right: "\\]", display: true }
+        ],
+        throwOnError: false
+      });
+    }
+
+    if (typeof Plotly === "undefined") {
+      const msg = '<p class="error-cdn">No se cargó Plotly. Revisa tu conexión a internet.</p>';
+      document.getElementById("grafica-izq").innerHTML = msg;
+      document.getElementById("grafica-der").innerHTML = msg;
+    } else {
+      selectCaso.addEventListener("change", configurarSliders);
+      sliderA.addEventListener("input", actualizar);
+      sliderB.addEventListener("input", actualizar);
+      configurarSliders();
+    }
+  });
+</script>
+
 </body>
 </html>
