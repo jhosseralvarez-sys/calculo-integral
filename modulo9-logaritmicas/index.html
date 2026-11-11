@@ -1,23 +1,522 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Módulo 7 - Próximamente</title>
-    <style>
-        body { font-family: sans-serif; background: #1e3c72; color: white; display: flex; justify-content: center; align-items: center; min-height: 100vh; text-align: center; }
-        .container { padding: 40px; }
-        h1 { font-size: 3em; margin-bottom: 20px; }
-        p { font-size: 1.3em; margin-bottom: 30px; }
-        a { color: #ffd700; text-decoration: none; font-size: 1.2em; }
-        a:hover { text-decoration: underline; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Módulo 9: Integrales Logarítmicas</title>
+
+<!-- KaTeX (CSS, núcleo y auto-render) -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+
+<!-- Plotly.js -->
+<script defer src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --azul-1: #0b1d3a;
+    --azul-2: #13315c;
+    --azul-3: #1e4a80;
+    --acento-azul: #4da3ff;
+    --acento-verde: #3ddc97;
+    --cian: #00e5ff;
+    --rojo: #ff4d6d;
+    --texto-suave: rgba(255, 255, 255, 0.78);
+    --vidrio: rgba(255, 255, 255, 0.08);
+    --vidrio-borde: rgba(255, 255, 255, 0.18);
+  }
+
+  body {
+    font-family: "Segoe UI", Roboto, Arial, sans-serif;
+    color: #ffffff;
+    background: linear-gradient(135deg, var(--azul-1) 0%, var(--azul-2) 50%, var(--azul-3) 100%);
+    background-attachment: fixed;
+    min-height: 100vh;
+    line-height: 1.6;
+    padding: 90px 20px 40px;
+  }
+
+  .btn-volver {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    z-index: 1000;
+    padding: 10px 18px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.12);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid var(--vidrio-borde);
+    color: #fff;
+    text-decoration: none;
+    font-weight: 600;
+  }
+  .btn-volver:hover { background: rgba(255, 255, 255, 0.22); }
+
+  header { text-align: center; margin-bottom: 40px; }
+  header h1 { font-size: 2.2rem; margin-bottom: 8px; }
+  header p { color: var(--texto-suave); }
+
+  .card {
+    max-width: 1100px;
+    margin: 0 auto 30px;
+    padding: 28px 32px;
+    background: var(--vidrio);
+    border: 1px solid var(--vidrio-borde);
+    border-radius: 20px;
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+  }
+  .card h2 {
+    font-size: 1.6rem;
+    margin-bottom: 14px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--vidrio-borde);
+  }
+  .card h3 { font-size: 1.2rem; margin: 22px 0 10px; color: var(--acento-azul); }
+  .card p { margin-bottom: 12px; color: var(--texto-suave); }
+  .card strong { color: #fff; }
+
+  .formula-destacada {
+    text-align: center;
+    background: rgba(0, 0, 0, 0.25);
+    border-radius: 14px;
+    padding: 16px;
+    margin: 14px 0;
+    overflow-x: auto;
+    font-size: 1.15rem;
+  }
+
+  .nota {
+    background: rgba(61, 220, 151, 0.12);
+    border-left: 4px solid var(--acento-verde);
+    padding: 12px 16px;
+    border-radius: 10px;
+    margin: 14px 0;
+    color: var(--texto-suave);
+  }
+
+  .controles {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 14px;
+    padding: 20px;
+    margin-bottom: 22px;
+  }
+  .control-fila {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 8px;
+  }
+  .control-fila label { min-width: 150px; font-weight: 600; font-size: 1.02rem; }
+  .control-fila input[type="range"] { flex: 1; min-width: 180px; accent-color: var(--cian); }
+  .valor {
+    font-family: Consolas, monospace;
+    background: rgba(255, 255, 255, 0.12);
+    padding: 4px 10px;
+    border-radius: 8px;
+    min-width: 70px;
+    text-align: center;
+  }
+
+  .grafica-caja { background: rgba(0, 0, 0, 0.2); border-radius: 14px; padding: 10px; }
+  .graficas { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  .grafica { width: 100%; height: 380px; }
+  .grafica-caja h4 { text-align: center; margin: 6px 0 4px; font-size: 1.05rem; }
+
+  .resultados {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+    margin-top: 22px;
+  }
+  .panel { background: rgba(0, 0, 0, 0.2); border-radius: 14px; padding: 18px; }
+  .panel h4 { margin-bottom: 10px; color: var(--acento-azul); }
+  .panel.cian h4 { color: var(--cian); }
+  .panel .salida { overflow-x: auto; font-size: 1.1rem; }
+
+  .valor-grande {
+    text-align: center;
+    font-size: 1.4rem;
+    margin-top: 16px;
+    padding: 16px;
+    background: rgba(0, 229, 255, 0.1);
+    border: 1px solid rgba(0, 229, 255, 0.35);
+    border-radius: 14px;
+  }
+  .error-cdn { color: #ff8a8a; font-weight: 600; }
+
+  .ejemplo-titulo { font-size: 1.3rem; color: var(--acento-verde); margin-bottom: 12px; }
+  .bloque-paso {
+    background: rgba(0, 0, 0, 0.22);
+    border-radius: 14px;
+    padding: 16px 20px;
+    margin: 14px 0;
+    overflow-x: auto;
+  }
+  .bloque-paso .titulo-paso { font-weight: 700; color: var(--acento-azul); margin-bottom: 6px; }
+  .bloque-paso .explica { color: var(--texto-suave); font-size: 0.97rem; margin-top: 8px; }
+  .resultado-final {
+    text-align: center;
+    background: rgba(61, 220, 151, 0.15);
+    border: 1px solid rgba(61, 220, 151, 0.4);
+    border-radius: 14px;
+    padding: 16px;
+    margin-top: 16px;
+    font-size: 1.1rem;
+  }
+
+  footer { text-align: center; color: var(--texto-suave); font-size: 0.9rem; margin-top: 20px; }
+
+  @media (max-width: 800px) {
+    .graficas, .resultados { grid-template-columns: 1fr; }
+    .grafica { height: 300px; }
+    header h1 { font-size: 1.7rem; }
+    .card { padding: 20px; }
+    .control-fila label { min-width: 100%; }
+    body { padding: 80px 12px 30px; }
+  }
+</style>
 </head>
 <body>
-    <div class="container">
-        <h1>🚧 Próximamente</h1>
-        <p>Este módulo estará disponible en la <strong>Fase 2</strong> del proyecto.</p>
-        <a href="../index.html">← Volver al menú principal</a>
+
+<a href="../index.html" class="btn-volver">← Volver al menú</a>
+
+<header>
+  <h1>Módulo 9: Integrales Logarítmicas</h1>
+  <p>Teoría, laboratorio interactivo y ejemplos resueltos</p>
+</header>
+
+<!-- ================= SECCIÓN 1: TEORÍA ================= -->
+<section class="card" id="seccion-teoria">
+  <h2>Sección 1: Teoría y Fórmulas Básicas</h2>
+
+  <p>
+    Algunas integrales tienen la forma de un cociente cuyo numerador es la derivada del denominador.
+    Al integrarlas aparece el <strong>logaritmo natural</strong>. Es la integral inversa de la derivada
+    \(\frac{d}{du}\ln|u| = \frac{1}{u}\).
+  </p>
+
+  <div class="formula-destacada">
+    \(\int \frac{du}{u} = \ln|u| + C\)
+  </div>
+
+  <h3>¿Por qué aparece el valor absoluto?</h3>
+  <p>
+    El logaritmo natural \(\ln t\) solo está definido para \(t > 0\). Pero la función \(\frac{1}{u}\) sí existe
+    para valores negativos de \(u\), por ejemplo \(u = -2\). Si escribiéramos \(\ln u\), la fórmula fallaría en
+    todo el intervalo \(u < 0\). Con \(\ln|u|\) la fórmula sirve en ambos lados del cero, porque
+    \(\frac{d}{du}\ln|u| = \frac{1}{u}\) vale tanto para \(u > 0\) como para \(u < 0\).
+  </p>
+
+  <h3>Cuándo completar el cuadrado</h3>
+  <p>
+    Si el denominador es un polinomio de segundo grado que no se factoriza fácilmente, conviene
+    <strong>completar el cuadrado</strong>. Eso lo transforma en una suma o diferencia de cuadrados.
+    Según el caso, la integral resultante puede ser un logaritmo o un arcotangente:
+  </p>
+
+  <div class="nota">
+    <strong>Regla práctica:</strong> si el numerador es la derivada del denominador, usa \(\ln|u|\).
+    Si el denominador queda como \(u^2 + k^2\) después de completar el cuadrado, usa el arcotangente.
+  </div>
+</section>
+
+<!-- ================= SECCIÓN 2: LABORATORIO ================= -->
+<section class="card" id="seccion-laboratorio">
+  <h2>Sección 2: Laboratorio Interactivo</h2>
+
+  <p>
+    Compara \(f(x) = \frac{1}{x}\) con \(g(x) = \ln x\). Mueve el deslizador <em>b</em> y observa que el área
+    bajo \(\frac{1}{x}\) desde \(1\) hasta \(b\) tiene la misma altura que el punto \((b, \ln b)\) sobre la curva del logaritmo.
+  </p>
+
+  <div class="controles">
+    <div class="control-fila">
+      <label for="slider-b">Límite superior b =</label>
+      <input type="range" id="slider-b" min="1" max="10" step="0.05" value="4">
+      <span class="valor" id="valor-b">4.00</span>
     </div>
+    <p>El límite inferior está fijo en \(a = 1\).</p>
+  </div>
+
+  <div class="graficas">
+    <div class="grafica-caja">
+      <h4>Panel izquierdo: \(f(x) = \frac{1}{x}\)</h4>
+      <div id="grafica-izq" class="grafica"></div>
+    </div>
+    <div class="grafica-caja">
+      <h4>Panel derecho: \(g(x) = \ln x\)</h4>
+      <div id="grafica-der" class="grafica"></div>
+    </div>
+  </div>
+
+  <div class="resultados">
+    <div class="panel">
+      <h4>Integral definida</h4>
+      <div class="salida" id="salida-integral"></div>
+    </div>
+    <div class="panel cian">
+      <h4>Comparación de valores</h4>
+      <div class="salida" id="salida-comparacion"></div>
+    </div>
+  </div>
+
+  <div class="valor-grande" id="area-numerica"></div>
+</section>
+
+<!-- ================= SECCIÓN 3: EJEMPLOS ================= -->
+<section class="card" id="seccion-ejemplos">
+  <h2>Sección 3: Ejemplos Resueltos Paso a Paso</h2>
+
+  <!-- EJEMPLO 1 -->
+  <div id="ejemplo-1">
+    <h3 class="ejemplo-titulo">Ejemplo 1: \(\int \frac{dx}{x \ln x}\)</h3>
+
+    <div class="bloque-paso">
+      <div class="titulo-paso">Paso 1: Identificar u y calcular du</div>
+      <div>\(u = \ln x \quad \Rightarrow \quad du = \frac{1}{x}\,dx\)</div>
+      <div class="explica">
+        Elegimos \(u\) como el logaritmo porque su derivada \(\frac{1}{x}\) aparece en el integrando.
+        La regla usada es \(\frac{d}{dx}\ln x = \frac{1}{x}\).
+      </div>
+    </div>
+
+    <div class="bloque-paso">
+      <div class="titulo-paso">Paso 2: Reemplazar</div>
+      <div>\(\int \frac{dx}{x\ln x} = \int \frac{1}{\ln x}\cdot\frac{dx}{x} = \int \frac{du}{u}\)</div>
+      <div class="explica">
+        El factor \(\frac{1}{x}\,dx\) se convierte en \(du\), y el \(\ln x\) del denominador se convierte en \(u\).
+      </div>
+    </div>
+
+    <div class="bloque-paso">
+      <div class="titulo-paso">Paso 3: Integrar y volver a x</div>
+      <div>\(\int \frac{du}{u} = \ln|u| + C = \ln|\ln x| + C\)</div>
+      <div class="explica">
+        Aplicamos la fórmula básica \(\int \frac{du}{u} = \ln|u| + C\). Como \(u = \ln x\), el resultado es
+        \(\ln|\ln x| + C\).
+      </div>
+    </div>
+
+    <div class="resultado-final">
+      <strong>Comprobación:</strong> \(\frac{d}{dx}\ln|\ln x| = \frac{1}{\ln x}\cdot\frac{1}{x} = \frac{1}{x\ln x}\) ✔
+    </div>
+  </div>
+
+  <!-- EJEMPLO 2 -->
+  <div id="ejemplo-2" style="margin-top: 40px;">
+    <h3 class="ejemplo-titulo">Ejemplo 2: \(\int \frac{dx}{x(\ln x)^2}\)</h3>
+
+    <div class="bloque-paso">
+      <div class="titulo-paso">Paso 1: Sustitución \(u = \ln x\)</div>
+      <div>\(u = \ln x \quad \Rightarrow \quad du = \frac{1}{x}\,dx\)</div>
+      <div class="explica">Igual que en el ejemplo anterior, \(\frac{1}{x}\,dx\) es exactamente \(du\).</div>
+    </div>
+
+    <div class="bloque-paso">
+      <div class="titulo-paso">Paso 2: Reemplazar</div>
+      <div>\(\int \frac{dx}{x(\ln x)^2} = \int \frac{1}{(\ln x)^2}\cdot\frac{dx}{x} = \int \frac{du}{u^2} = \int u^{-2}\,du\)</div>
+      <div class="explica">
+        Aquí el denominador tiene una potencia, \((\ln x)^2 = u^2\), así que el integrando queda como \(u^{-2}\).
+      </div>
+    </div>
+
+    <div class="bloque-paso">
+      <div class="titulo-paso">Paso 3: Aplicar la regla de potencias</div>
+      <div>\(\int u^{-2}\,du = \frac{u^{-2+1}}{-2+1} + C = \frac{u^{-1}}{-1} + C = -u^{-1} + C\)</div>
+      <div class="explica">
+        Usamos \(\int u^n\,du = \frac{u^{n+1}}{n+1} + C\) con \(n = -2\), así que \(n+1 = -1\). Como no es \(-1\) en el
+        exponente de \(u\) sino que es \(n\) lo que vale \(-2\), la fórmula de potencias sí aplica.
+        Dividir entre \(-1\) cambia el signo.
+      </div>
+    </div>
+
+    <div class="bloque-paso">
+      <div class="titulo-paso">Paso 4: Volver a la variable x</div>
+      <div>\(\int \frac{dx}{x(\ln x)^2} = -\frac{1}{u} + C = -\frac{1}{\ln x} + C\)</div>
+    </div>
+
+    <div class="resultado-final">
+      <strong>Comprobación:</strong> \(\frac{d}{dx}\left(-\frac{1}{\ln x}\right) = \frac{1}{(\ln x)^2}\cdot\frac{1}{x} = \frac{1}{x(\ln x)^2}\) ✔
+    </div>
+  </div>
+
+  <!-- EJEMPLO 3 -->
+  <div id="ejemplo-3" style="margin-top: 40px;">
+    <h3 class="ejemplo-titulo">Ejemplo 3: \(\int \frac{dx}{x^2+2x+2}\)</h3>
+
+    <div class="bloque-paso">
+      <div class="titulo-paso">Paso 1: Completar el cuadrado en el denominador</div>
+      <div>\(x^2 + 2x + 2 = (x^2 + 2x + 1) + 1 = (x+1)^2 + 1\)</div>
+      <div class="explica">
+        Tomamos la mitad del coeficiente de \(x\), que es \(\frac{2}{2} = 1\), y lo elevamos al cuadrado: \(1^2 = 1\).
+        Sumamos y restamos ese 1 para formar el trinomio cuadrado perfecto \((x+1)^2\).
+      </div>
+    </div>
+
+    <div class="bloque-paso">
+      <div class="titulo-paso">Paso 2: Sustitución \(u = x+1\)</div>
+      <div>\(u = x+1 \quad \Rightarrow \quad du = dx\)</div>
+      <div>\(\int \frac{dx}{x^2+2x+2} = \int \frac{dx}{(x+1)^2+1} = \int \frac{du}{u^2+1}\)</div>
+      <div class="explica">
+        Como \(du = dx\), no aparece ningún factor adicional. El denominador ya tiene la forma \(u^2 + 1\).
+      </div>
+    </div>
+
+    <div class="bloque-paso">
+      <div class="titulo-paso">Paso 3: Aplicar la fórmula del arcotangente</div>
+      <div>\(\int \frac{du}{u^2+1} = \arctan(u) + C\)</div>
+      <div class="explica">
+        Esta es la fórmula estándar \(\int \frac{du}{u^2 + a^2} = \frac{1}{a}\arctan\frac{u}{a} + C\) con \(a = 1\),
+        así que el factor \(\frac{1}{a}\) vale 1 y no aparece.
+      </div>
+    </div>
+
+    <div class="bloque-paso">
+      <div class="titulo-paso">Paso 4: Volver a la variable x</div>
+      <div>\(\int \frac{dx}{x^2+2x+2} = \arctan(x+1) + C\)</div>
+    </div>
+
+    <div class="resultado-final">
+      <strong>Comprobación:</strong> \(\frac{d}{dx}\arctan(x+1) = \frac{1}{1+(x+1)^2} = \frac{1}{x^2+2x+2}\) ✔
+    </div>
+  </div>
+</section>
+
+<footer>Módulo 9 · Cálculo Integral</footer>
+
+<script>
+  // ---------- Funciones ----------
+  const f = x => 1 / x;          // f(x) = 1/x
+  const g = x => Math.log(x);    // g(x) = ln x
+  const A = 1;                   // límite inferior fijo
+
+  // ---------- Elementos ----------
+  const sliderB = document.getElementById("slider-b");
+  const valorB = document.getElementById("valor-b");
+  const salidaIntegral = document.getElementById("salida-integral");
+  const salidaComparacion = document.getElementById("salida-comparacion");
+  const areaNumerica = document.getElementById("area-numerica");
+
+  // ---------- Utilidades ----------
+  function tex(elemento, latex) {
+    if (window.katex) {
+      katex.render(latex, elemento, { throwOnError: false, displayMode: true });
+    } else {
+      elemento.textContent = latex;
+    }
+  }
+
+  function puntos(fn, desde, hasta, n = 300) {
+    const xs = [], ys = [];
+    for (let i = 0; i <= n; i++) {
+      const t = desde + (hasta - desde) * i / n;
+      xs.push(t);
+      ys.push(fn(t));
+    }
+    return { xs, ys };
+  }
+
+  const layoutBase = {
+    paper_bgcolor: "rgba(0,0,0,0)",
+    plot_bgcolor: "rgba(0,0,0,0)",
+    font: { color: "#ffffff" },
+    margin: { l: 55, r: 25, t: 20, b: 50 },
+    showlegend: false,
+    xaxis: { gridcolor: "rgba(255,255,255,0.12)", zerolinecolor: "rgba(255,255,255,0.4)" },
+    yaxis: { gridcolor: "rgba(255,255,255,0.12)", zerolinecolor: "rgba(255,255,255,0.4)" }
+  };
+  const config = { responsive: true, displayModeBar: false };
+
+  // Curvas base (no cambian con el slider)
+  const curvaF = puntos(f, 0.1, 10.5, 400);
+  const curvaG = puntos(g, 0.1, 10.5, 400);
+
+  // ---------- Dibujo y cálculos ----------
+  function actualizar() {
+    const b = parseFloat(sliderB.value);
+    valorB.textContent = b.toFixed(2);
+
+    // Área exacta: ∫_1^b (1/x) dx = ln(b) - ln(1) = ln(b)
+    const area = Math.log(b) - Math.log(A);
+
+    // Sombreado en la gráfica izquierda: área bajo 1/x desde 1 hasta b
+    const sombra = puntos(f, A, b, 200);
+
+    // Izquierda: f(x) = 1/x con sombreado cian
+    Plotly.react("grafica-izq", [
+      { x: curvaF.xs, y: curvaF.ys, mode: "lines",
+        line: { color: "#ffffff", width: 2.5 }, hoverinfo: "skip" },
+      { x: sombra.xs, y: sombra.ys, mode: "lines", fill: "tozeroy",
+        fillcolor: "rgba(0,229,255,0.45)", line: { color: "#00e5ff", width: 1.5 }, hoverinfo: "skip" }
+    ], {
+      ...layoutBase,
+      xaxis: { ...layoutBase.xaxis, title: "x", range: [0, 10.5] },
+      yaxis: { ...layoutBase.yaxis, title: "f(x)", range: [0, 1.2] }
+    }, config);
+
+    // Derecha: g(x) = ln x con punto rojo en (b, ln b) y línea punteada a la altura del área
+    Plotly.react("grafica-der", [
+      { x: curvaG.xs, y: curvaG.ys, mode: "lines",
+        line: { color: "#ffffff", width: 2.5 }, hoverinfo: "skip" },
+      { x: [b], y: [area], mode: "markers",
+        marker: { color: "#ff4d6d", size: 12, line: { color: "#ffffff", width: 1 } },
+        hoverinfo: "skip" },
+      { x: [0, b], y: [area, area], mode: "lines",
+        line: { color: "#ff4d6d", width: 2, dash: "dot" }, hoverinfo: "skip" },
+      { x: [b, b], y: [0, area], mode: "lines",
+        line: { color: "#ff4d6d", width: 1, dash: "dot" }, hoverinfo: "skip" }
+    ], {
+      ...layoutBase,
+      xaxis: { ...layoutBase.xaxis, title: "x", range: [0, 10.5] },
+      yaxis: { ...layoutBase.yaxis, title: "g(x)", range: [-0.5, 2.6] }
+    }, config);
+
+    // ---------- Textos y fórmulas ----------
+    tex(salidaIntegral,
+      `\\int_{1}^{${b.toFixed(2)}} \\frac{dx}{x}
+       = \\left[\\ln|x|\\right]_{1}^{${b.toFixed(2)}}
+       = \\ln(${b.toFixed(2)}) - \\ln(1)
+       = ${area.toFixed(4)}`);
+
+    tex(salidaComparacion,
+      `\\text{Altura del punto } (b, \\ln b) = ${area.toFixed(4)}
+       \\qquad
+       \\text{Área sombreada} = ${area.toFixed(4)}`);
+
+    areaNumerica.innerHTML =
+      `Valor del área: <strong>${area.toFixed(4)}</strong> = ln(${b.toFixed(2)}) ` +
+      `&nbsp;→&nbsp; <span style="color:#ff4d6d">Coinciden con la altura del punto rojo</span>`;
+  }
+
+  // ---------- Arranque ----------
+  window.addEventListener("load", () => {
+    if (window.renderMathInElement) {
+      renderMathInElement(document.body, {
+        delimiters: [
+          { left: "\\(", right: "\\)", display: false },
+          { left: "\\[", right: "\\]", display: true }
+        ],
+        throwOnError: false
+      });
+    }
+
+    if (typeof Plotly === "undefined") {
+      const msg = '<p class="error-cdn">No se cargó Plotly. Revisa tu conexión a internet.</p>';
+      document.getElementById("grafica-izq").innerHTML = msg;
+      document.getElementById("grafica-der").innerHTML = msg;
+    } else {
+      sliderB.addEventListener("input", actualizar);
+      actualizar();
+    }
+  });
+</script>
+
 </body>
 </html>
