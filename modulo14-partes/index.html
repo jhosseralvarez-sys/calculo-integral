@@ -1,23 +1,780 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Módulo 7 - Próximamente</title>
-    <style>
-        body { font-family: sans-serif; background: #1e3c72; color: white; display: flex; justify-content: center; align-items: center; min-height: 100vh; text-align: center; }
-        .container { padding: 40px; }
-        h1 { font-size: 3em; margin-bottom: 20px; }
-        p { font-size: 1.3em; margin-bottom: 30px; }
-        a { color: #ffd700; text-decoration: none; font-size: 1.2em; }
-        a:hover { text-decoration: underline; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Módulo 14: Integración por Partes</title>
+
+<!-- KaTeX (CSS, núcleo y auto-render) -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+
+<!-- Plotly.js -->
+<script defer src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --azul-1: #0b1d3a;
+    --azul-2: #13315c;
+    --azul-3: #1e4a80;
+    --acento-azul: #4da3ff;
+    --acento-verde: #3ddc97;
+    --cian: #00e5ff;
+    --magenta: #ff3cac;
+    --amarillo: #ffd166;
+    --texto-suave: rgba(255, 255, 255, 0.78);
+    --vidrio: rgba(255, 255, 255, 0.08);
+    --vidrio-borde: rgba(255, 255, 255, 0.18);
+  }
+
+  body {
+    font-family: "Segoe UI", Roboto, Arial, sans-serif;
+    color: #ffffff;
+    background: linear-gradient(135deg, var(--azul-1) 0%, var(--azul-2) 50%, var(--azul-3) 100%);
+    background-attachment: fixed;
+    min-height: 100vh;
+    line-height: 1.6;
+    padding: 90px 20px 40px;
+  }
+
+  .btn-volver {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    z-index: 1000;
+    padding: 10px 18px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.12);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid var(--vidrio-borde);
+    color: #fff;
+    text-decoration: none;
+    font-weight: 600;
+  }
+  .btn-volver:hover { background: rgba(255, 255, 255, 0.22); }
+
+  header { text-align: center; margin-bottom: 40px; }
+  header h1 { font-size: 2.2rem; margin-bottom: 8px; }
+  header p { color: var(--texto-suave); }
+
+  .card {
+    max-width: 1100px;
+    margin: 0 auto 30px;
+    padding: 28px 32px;
+    background: var(--vidrio);
+    border: 1px solid var(--vidrio-borde);
+    border-radius: 20px;
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+  }
+  .card h2 {
+    font-size: 1.6rem;
+    margin-bottom: 14px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--vidrio-borde);
+  }
+  .card h3 { font-size: 1.2rem; margin: 22px 0 10px; color: var(--acento-azul); }
+  .card p { margin-bottom: 12px; color: var(--texto-suave); }
+  .card strong { color: #fff; }
+
+  .formula-destacada {
+    text-align: center;
+    background: rgba(0, 0, 0, 0.25);
+    border-radius: 14px;
+    padding: 16px;
+    margin: 14px 0;
+    overflow-x: auto;
+    font-size: 1.2rem;
+  }
+
+  .nota {
+    background: rgba(61, 220, 151, 0.12);
+    border-left: 4px solid var(--acento-verde);
+    padding: 12px 16px;
+    border-radius: 10px;
+    margin: 14px 0;
+    color: var(--texto-suave);
+  }
+
+  /* ----- LIATE visual ----- */
+  .liate-lista {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 12px;
+    margin: 18px 0;
+  }
+  .liate-item {
+    background: rgba(0, 0, 0, 0.25);
+    border: 1px solid var(--vidrio-borde);
+    border-radius: 14px;
+    padding: 14px 10px;
+    text-align: center;
+    transition: transform 0.2s, border-color 0.2s;
+  }
+  .liate-item:hover { transform: translateY(-3px); border-color: var(--cian); }
+  .liate-letra {
+    display: block;
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--cian);
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+  .liate-nombre { font-weight: 600; font-size: 0.95rem; color: #fff; }
+  .liate-ejemplo { font-size: 0.85rem; color: var(--texto-suave); margin-top: 4px; }
+  .liate-orden {
+    display: inline-block;
+    margin-top: 6px;
+    font-size: 0.75rem;
+    background: rgba(255, 255, 255, 0.12);
+    padding: 2px 8px;
+    border-radius: 999px;
+  }
+
+  /* ----- Laboratorio ----- */
+  .controles {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 14px;
+    padding: 20px;
+    margin-bottom: 22px;
+  }
+  .asistente {
+    display: grid;
+    grid-template-columns: 1fr 1fr auto;
+    gap: 14px;
+    align-items: end;
+  }
+  .campo label { display: block; font-weight: 600; margin-bottom: 6px; font-size: 0.98rem; }
+  .campo select {
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: 1px solid var(--vidrio-borde);
+    background: rgba(255, 255, 255, 0.12);
+    color: #fff;
+    font-size: 1rem;
+    cursor: pointer;
+  }
+  .campo select option { background: #13315c; color: #fff; }
+
+  .btn-aplicar {
+    padding: 11px 22px;
+    border-radius: 10px;
+    border: none;
+    background: linear-gradient(135deg, var(--cian), var(--acento-azul));
+    color: #0b1d3a;
+    font-weight: 700;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s;
+  }
+  .btn-aplicar:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(0, 229, 255, 0.35); }
+
+  .resultado-liate {
+    margin-top: 18px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+  .caja-rol {
+    background: rgba(0, 0, 0, 0.25);
+    border: 2px solid var(--vidrio-borde);
+    border-radius: 14px;
+    padding: 16px;
+    text-align: center;
+    transition: border-color 0.3s, box-shadow 0.3s;
+  }
+  .caja-rol.activa-u { border-color: var(--amarillo); box-shadow: 0 0 18px rgba(255, 209, 102, 0.35); }
+  .caja-rol.activa-dv { border-color: var(--magenta); box-shadow: 0 0 18px rgba(255, 60, 172, 0.35); }
+  .caja-rol .rol { font-weight: 700; font-size: 0.95rem; color: var(--texto-suave); margin-bottom: 6px; }
+  .caja-rol .expr { font-size: 1.25rem; min-height: 2em; }
+
+  .mensaje-liate {
+    margin-top: 14px;
+    padding: 14px 18px;
+    background: rgba(255, 209, 102, 0.1);
+    border: 1px solid rgba(255, 209, 102, 0.4);
+    border-radius: 12px;
+    color: #fff;
+    font-size: 1rem;
+    min-height: 3em;
+  }
+
+  .grafica-caja { background: rgba(0, 0, 0, 0.2); border-radius: 14px; padding: 10px; margin-top: 22px; }
+  #grafica { width: 100%; height: 400px; }
+
+  .resultados {
+    margin-top: 18px;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+  .panel { background: rgba(0, 0, 0, 0.2); border-radius: 14px; padding: 18px; }
+  .panel h4 { margin-bottom: 10px; color: var(--acento-azul); }
+  .panel.cian h4 { color: var(--cian); }
+  .panel .salida { overflow-x: auto; font-size: 1.1rem; }
+
+  .valor-grande {
+    text-align: center;
+    font-size: 1.3rem;
+    margin-top: 14px;
+    padding: 14px;
+    background: rgba(0, 229, 255, 0.1);
+    border: 1px solid rgba(0, 229, 255, 0.35);
+    border-radius: 14px;
+  }
+  .limites { display: flex; gap: 14px; flex-wrap: wrap; align-items: center; margin-top: 14px; }
+  .limites label { font-weight: 600; }
+  .limites input[type="range"] { flex: 1; min-width: 160px; accent-color: var(--cian); }
+  .valor {
+    font-family: Consolas, monospace;
+    background: rgba(255, 255, 255, 0.12);
+    padding: 4px 10px;
+    border-radius: 8px;
+    min-width: 60px;
+    text-align: center;
+  }
+  .error-cdn { color: #ff8a8a; font-weight: 600; }
+
+  .ejemplo-titulo { font-size: 1.3rem; color: var(--acento-verde); margin-bottom: 12px; }
+  .bloque-paso {
+    background: rgba(0, 0, 0, 0.22);
+    border-radius: 14px;
+    padding: 16px 20px;
+    margin: 14px 0;
+    overflow-x: auto;
+  }
+  .bloque-paso .titulo-paso { font-weight: 700; color: var(--acento-azul); margin-bottom: 6px; }
+  .bloque-paso .explica { color: var(--texto-suave); font-size: 0.97rem; margin-top: 8px; }
+  .resultado-final {
+    text-align: center;
+    background: rgba(61, 220, 151, 0.15);
+    border: 1px solid rgba(61, 220, 151, 0.4);
+    border-radius: 14px;
+    padding: 16px;
+    margin-top: 16px;
+    font-size: 1.1rem;
+  }
+
+  footer { text-align: center; color: var(--texto-suave); font-size: 0.9rem; margin-top: 20px; }
+
+  @media (max-width: 900px) {
+    .liate-lista { grid-template-columns: repeat(2, 1fr); }
+    .asistente { grid-template-columns: 1fr; }
+    .resultado-liate { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 800px) {
+    #grafica { height: 300px; }
+    header h1 { font-size: 1.7rem; }
+    .card { padding: 20px; }
+    body { padding: 80px 12px 30px; }
+  }
+</style>
 </head>
 <body>
-    <div class="container">
-        <h1>🚧 Próximamente</h1>
-        <p>Este módulo estará disponible en la <strong>Fase 2</strong> del proyecto.</p>
-        <a href="../index.html">← Volver al menú principal</a>
+
+<a href="../index.html" class="btn-volver">← Volver al menú</a>
+
+<header>
+  <h1>Módulo 14: Integración por Partes</h1>
+  <p>Teoría, regla LIATE, laboratorio interactivo y ejemplos resueltos</p>
+</header>
+
+<!-- ================= SECCIÓN 1: TEORÍA ================= -->
+<section class="card" id="seccion-teoria">
+  <h2>Sección 1: Teoría y la Regla LIATE</h2>
+
+  <p>
+    La <strong>integración por partes</strong> es el método inverso de la <strong>regla del producto</strong> en derivadas.
+    Si \(\frac{d}{dx}(uv) = u\,v' + v\,u'\), al integrar ambos lados y despejar \(\int u\,v'\,dx\) obtenemos la fórmula:
+  </p>
+
+  <div class="formula-destacada">
+    \(\int u \, dv = u \cdot v - \int v \, du\)
+  </div>
+
+  <p>
+    La idea es cambiar una integral difícil \(\int u\,dv\) por otra, \(\int v\,du\), que suele ser más sencilla.
+    La clave está en elegir bien qué parte del integrando será \(u\) (la que derivamos) y cuál será \(dv\) (la que integramos).
+  </p>
+
+  <h3>La regla LIATE</h3>
+  <p>
+    LIATE es una lista de prioridades. La función que aparezca <strong>primero</strong> en la lista se elige como \(u\),
+    y el resto del integrando se convierte en \(dv\):
+  </p>
+
+  <div class="liate-lista">
+    <div class="liate-item">
+      <span class="liate-letra">L</span>
+      <div class="liate-nombre">Logarítmicas</div>
+      <div class="liate-ejemplo">\(\ln x\)</div>
+      <span class="liate-orden">1.º</span>
     </div>
+    <div class="liate-item">
+      <span class="liate-letra">I</span>
+      <div class="liate-nombre">Inversas trig.</div>
+      <div class="liate-ejemplo">\(\arctan x\)</div>
+      <span class="liate-orden">2.º</span>
+    </div>
+    <div class="liate-item">
+      <span class="liate-letra">A</span>
+      <div class="liate-nombre">Algebraicas</div>
+      <div class="liate-ejemplo">\(x^2\)</div>
+      <span class="liate-orden">3.º</span>
+    </div>
+    <div class="liate-item">
+      <span class="liate-letra">T</span>
+      <div class="liate-nombre">Trigonométricas</div>
+      <div class="liate-ejemplo">\(\sin x\)</div>
+      <span class="liate-orden">4.º</span>
+    </div>
+    <div class="liate-item">
+      <span class="liate-letra">E</span>
+      <div class="liate-nombre">Exponenciales</div>
+      <div class="liate-ejemplo">\(e^x\)</div>
+      <span class="liate-orden">5.º</span>
+    </div>
+  </div>
+
+  <div class="nota">
+    <strong>¿Por qué este orden?</strong> Las funciones de la izquierda de LIATE se simplifican al derivarlas:
+    el logaritmo y las inversas trigonométricas se vuelven algebraicas, y las algebraicas bajan de grado.
+    Las de la derecha (exponenciales y trigonométricas) se mantienen casi iguales al integrarlas, así que conviene
+    integrarlas como \(dv\). Por eso en el ejemplo \(\int x\arctan x\,dx\), \(\arctan x\) (inversa) va antes que \(x\) (algebraica).
+  </div>
+</section>
+
+<!-- ================= SECCIÓN 2: LABORATORIO ================= -->
+<section class="card" id="seccion-laboratorio">
+  <h2>Sección 2: Laboratorio Interactivo</h2>
+
+  <p>
+    Elige dos tipos de función que aparezcan en la integral y pulsa <strong>Aplicar LIATE</strong>. El asistente
+    indicará cuál debe ser \(u\) y cuál \(dv\), y mostrará la gráfica del producto correspondiente al ejemplo
+    \(\int x\arctan x\,dx\), con el área sombreada entre los límites que elijas.
+  </p>
+
+  <div class="controles">
+    <div class="asistente">
+      <div class="campo">
+        <label for="select-1">Primera función</label>
+        <select id="select-1">
+          <option value="L">Logarítmica (ln x)</option>
+          <option value="I">Inversa trigonométrica (arctan x)</option>
+          <option value="A" selected>Algebraica (x)</option>
+          <option value="T">Trigonométrica (sin x)</option>
+          <option value="E">Exponencial (eˣ)</option>
+        </select>
+      </div>
+      <div class="campo">
+        <label for="select-2">Segunda función</label>
+        <select id="select-2">
+          <option value="L">Logarítmica (ln x)</option>
+          <option value="I" selected>Inversa trigonométrica (arctan x)</option>
+          <option value="A">Algebraica (x)</option>
+          <option value="T">Trigonométrica (sin x)</option>
+          <option value="E">Exponencial (eˣ)</option>
+        </select>
+      </div>
+      <button class="btn-aplicar" id="btn-liate">Aplicar LIATE</button>
+    </div>
+
+    <div class="resultado-liate">
+      <div class="caja-rol" id="caja-u">
+        <div class="rol">Función u (se deriva)</div>
+        <div class="expr" id="expr-u">—</div>
+      </div>
+      <div class="caja-rol" id="caja-dv">
+        <div class="rol">Función dv (se integra)</div>
+        <div class="expr" id="expr-dv">—</div>
+      </div>
+    </div>
+
+    <div class="mensaje-liate" id="mensaje-liate">
+      Selecciona dos funciones y pulsa <strong>Aplicar LIATE</strong>.
+    </div>
+  </div>
+
+  <div class="grafica-caja">
+    <div id="grafica"></div>
+  </div>
+
+  <div class="limites">
+    <label for="slider-a">Límite a =</label>
+    <input type="range" id="slider-a" min="-3" max="3" step="0.1" value="0">
+    <span class="valor" id="valor-a">0.0</span>
+    <label for="slider-b">Límite b =</label>
+    <input type="range" id="slider-b" min="-3" max="3" step="0.1" value="2">
+    <span class="valor" id="valor-b">2.0</span>
+  </div>
+
+  <div class="resultados">
+    <div class="panel">
+      <h4>Antiderivada obtenida por partes</h4>
+      <div class="salida" id="salida-antiderivada"></div>
+    </div>
+    <div class="panel cian">
+      <h4>Integral definida</h4>
+      <div class="salida" id="salida-integral"></div>
+    </div>
+  </div>
+
+  <div class="valor-grande" id="area-numerica"></div>
+</section>
+
+<!-- ================= SECCIÓN 3: EJEMPLOS ================= -->
+<section class="card" id="seccion-ejemplos">
+  <h2>Sección 3: Ejemplos Resueltos Paso a Paso</h2>
+
+  <!-- EJEMPLO 1 -->
+  <div id="ejemplo-1">
+    <h3 class="ejemplo-titulo">Ejemplo 1: \(\int x\arctan x\,dx\)</h3>
+
+    <div class="bloque-paso">
+      <div class="titulo-paso">Paso 1: Aplicar LIATE</div>
+      <div>\(I\) (inversa trigonométrica) va antes que \(A\) (algebraica), así que:</div>
+      <div>\(u = \arctan x \qquad dv = x\,dx\)</div>
+      <div class="explica">
+        La regla LIATE pone a \(\arctan x\) como \(u\), porque al derivarlo se vuelve algebraico (\(\frac{1}{1+x^2}\)).
+        El resto, \(x\,dx\), es \(dv\), que es fácil de integrar.
+      </div>
+    </div>
+
+    <div class="bloque-paso">
+      <div class="titulo-paso">Paso 2: Calcular du y v</div>
+      <div>\(du = \frac{1}{1+x^2}\,dx \qquad v = \int x\,dx = \frac{x^2}{2}\)</div>
+      <div class="explica">
+        Derivamos \(\arctan x\) con \(\frac{d}{dx}\arctan x = \frac{1}{1+x^2}\). Integramos \(x\,dx\) con la regla de potencias:
+        \(\frac{x^{1+1}}{1+1} = \frac{x^2}{2}\). No agregamos constante a \(v\) porque basta con una primitiva.
+      </div>
+    </div>
+
+    <div class="bloque-paso">
+      <div class="titulo-paso">Paso 3: Aplicar la fórmula de partes</div>
+      <div>\(\int x\arctan x\,dx = \frac{x^2}{2}\arctan x - \int \frac{x^2}{2}\cdot\frac{1}{1+x^2}\,dx\)</div>
+      <div>\(= \frac{x^2}{2}\arctan x - \frac{1}{2}\int \frac{x^2}{1+x^2}\,dx\)</div>
+      <div class="explica">
+        Sustituimos en \(\int u\,dv = uv - \int v\,du\). El \(\frac12\) de \(v\) sale de la integral.
+      </div>
+    </div>
+
+    <div class="bloque-paso">
+      <div class="titulo-paso">Paso 4: Resolver la integral resultante</div>
+      <div>\(\frac{x^2}{1+x^2} = 1 - \frac{1}{1+x^2}\)</div>
+      <div>\(\frac{1}{2}\int \left(1 - \frac{1}{1+x^2}\right)dx = \frac{1}{2}\left(x - \arctan x\right)\)</div>
+      <div class="explica">
+        Dividimos \(x^2\) entre \(1+x^2\) escribiendo \(x^2 = (1+x^2) - 1\). Luego usamos \(\int dx = x\) y
+        \(\int \frac{dx}{1+x^2} = \arctan x\). Si prefieres la sustitución \(w = 1+x^2\), la parte algebraica se
+        resuelve igual, pero aquí la separación es más directa.
+      </div>
+    </div>
+
+    <div class="bloque-paso">
+      <div class="titulo-paso">Paso 5: Resultado final</div>
+      <div>\(\int x\arctan x\,dx = \frac{x^2}{2}\arctan x - \frac{1}{2}\left(x - \arctan x\right) + C\)</div>
+      <div>\(= \frac{x^2+1}{2}\arctan x - \frac{x}{2} + C\)</div>
+    </div>
+
+    <div class="resultado-final">
+      <strong>Comprobación:</strong> derivamos \(\frac{x^2+1}{2}\arctan x - \frac{x}{2}\):
+      \(x\arctan x + \frac{x^2+1}{2}\cdot\frac{1}{1+x^2} - \frac12 = x\arctan x + \frac12 - \frac12 = x\arctan x\) ✔
+    </div>
+  </div>
+
+  <!-- EJEMPLO 2 -->
+  <div id="ejemplo-2" style="margin-top: 40px;">
+    <h3 class="ejemplo-titulo">Ejemplo 2: \(\int \ln(x^2+1)\,dx\)</h3>
+
+    <div class="bloque-paso">
+      <div class="titulo-paso">Paso 1: Aplicar LIATE</div>
+      <div>\(L\) (logarítmica) va primero:</div>
+      <div>\(u = \ln(x^2+1) \qquad dv = dx\)</div>
+      <div class="explica">
+        El logaritmo tiene prioridad. Además, \(dv = dx\) es lo más simple posible: su primitiva es \(v = x\).
+      </div>
+    </div>
+
+    <div class="bloque-paso">
+      <div class="titulo-paso">Paso 2: Derivar u (regla de la cadena) e integrar dv</div>
+      <div>\(du = \frac{2x}{x^2+1}\,dx \qquad v = x\)</div>
+      <div class="explica">
+        Para derivar \(\ln(x^2+1)\) usamos la regla de la cadena: \(\frac{d}{dx}\ln(w) = \frac{1}{w}\cdot w'\), con
+        \(w = x^2+1\) y \(w' = 2x\). El \(2x\) del numerador es la derivada del interior.
+      </div>
+    </div>
+
+    <div class="bloque-paso">
+      <div class="titulo-paso">Paso 3: Aplicar la fórmula de partes</div>
+      <div>\(\int \ln(x^2+1)\,dx = x\ln(x^2+1) - \int x\cdot\frac{2x}{x^2+1}\,dx\)</div>
+      <div>\(= x\ln(x^2+1) - \int \frac{2x^2}{x^2+1}\,dx\)</div>
+    </div>
+
+    <div class="bloque-paso">
+      <div class="titulo-paso">Paso 4: Resolver la integral resultante</div>
+      <div>\(\frac{2x^2}{x^2+1} = 2 - \frac{2}{x^2+1}\)</div>
+      <div>\(\int \left(2 - \frac{2}{x^2+1}\right)dx = 2x - 2\arctan x\)</div>
+      <div class="explica">
+        Escribimos \(2x^2 = 2(x^2+1) - 2\) para dividir la fracción. Luego integramos término a término:
+        \(\int 2\,dx = 2x\) y \(\int \frac{2}{1+x^2}\,dx = 2\arctan x\).
+      </div>
+    </div>
+
+    <div class="bloque-paso">
+      <div class="titulo-paso">Paso 5: Resultado final</div>
+      <div>\(\int \ln(x^2+1)\,dx = x\ln(x^2+1) - 2x + 2\arctan x + C\)</div>
+    </div>
+
+    <div class="resultado-final">
+      <strong>Comprobación:</strong> \(\frac{d}{dx}\left[x\ln(x^2+1) - 2x + 2\arctan x\right] = \ln(x^2+1) + \frac{2x^2}{x^2+1} - 2 + \frac{2}{1+x^2} = \ln(x^2+1)\) ✔
+    </div>
+  </div>
+
+  <!-- EJEMPLO 3 -->
+  <div id="ejemplo-3" style="margin-top: 40px;">
+    <h3 class="ejemplo-titulo">Ejemplo 3: \(\int e^{ax}\cos(bx)\,dx\) (caso cíclico)</h3>
+
+    <div class="bloque-paso">
+      <div class="titulo-paso">Paso 1: Primera aplicación de partes</div>
+      <div>\(u = \cos(bx) \qquad dv = e^{ax}\,dx\)</div>
+      <div>\(du = -b\sin(bx)\,dx \qquad v = \frac{1}{a}e^{ax}\)</div>
+      <div>\(I = \frac{1}{a}e^{ax}\cos(bx) - \int \frac{1}{a}e^{ax}\cdot(-b\sin(bx))\,dx = \frac{1}{a}e^{ax}\cos(bx) + \frac{b}{a}\int e^{ax}\sin(bx)\,dx\)</div>
+      <div class="explica">
+        Llamamos \(I = \int e^{ax}\cos(bx)\,dx\). Elegimos \(u = \cos(bx)\) porque la trigonométrica va antes que la
+        exponencial según LIATE, pero aquí cualquiera de las dos sirve, siempre que sea consistente en ambas aplicaciones.
+        El signo menos de \(du\) se combina con el menos de la fórmula de partes para dar \(+\).
+      </div>
+    </div>
+
+    <div class="bloque-paso">
+      <div class="titulo-paso">Paso 2: Segunda aplicación de partes</div>
+      <div>\(\int e^{ax}\sin(bx)\,dx\): \(u = \sin(bx) \qquad dv = e^{ax}\,dx\)</div>
+      <div>\(du = b\cos(bx)\,dx \qquad v = \frac{1}{a}e^{ax}\)</div>
+      <div>\(\int e^{ax}\sin(bx)\,dx = \frac{1}{a}e^{ax}\sin(bx) - \frac{b}{a}\int e^{ax}\cos(bx)\,dx = \frac{1}{a}e^{ax}\sin(bx) - \frac{b}{a}I\)</div>
+      <div class="explica">
+        Aplicamos partes de nuevo a la integral que apareció, usando la misma elección de \(dv\). Así reaparece
+        \(I\) en el lado derecho: por eso se llama <strong>caso cíclico</strong>.
+      </div>
+    </div>
+
+    <div class="bloque-paso">
+      <div class="titulo-paso">Paso 3: Sustituir y despejar I</div>
+      <div>\(I = \frac{1}{a}e^{ax}\cos(bx) + \frac{b}{a}\left[\frac{1}{a}e^{ax}\sin(bx) - \frac{b}{a}I\right]\)</div>
+      <div>\(I = \frac{1}{a}e^{ax}\cos(bx) + \frac{b}{a^2}e^{ax}\sin(bx) - \frac{b^2}{a^2}I\)</div>
+      <div class="explica">
+        Pasamos \(\frac{b^2}{a^2}I\) al lado izquierdo: \(I + \frac{b^2}{a^2}I = \ldots\), es decir \(\left(1+\frac{b^2}{a^2}\right)I\).
+      </div>
+    </div>
+
+    <div class="bloque-paso">
+      <div class="titulo-paso">Paso 4: Despejar I</div>
+      <div>\(\left(\frac{a^2+b^2}{a^2}\right)I = \frac{1}{a}e^{ax}\cos(bx) + \frac{b}{a^2}e^{ax}\sin(bx)\)</div>
+      <div>\(I = \frac{a^2}{a^2+b^2}\left[\frac{1}{a}e^{ax}\cos(bx) + \frac{b}{a^2}e^{ax}\sin(bx)\right]\)</div>
+      <div>\(I = \frac{e^{ax}}{a^2+b^2}\left[a\cos(bx) + b\sin(bx)\right] + C\)</div>
+      <div class="explica">
+        El factor \(\frac{a^2}{a^2+b^2}\) multiplica cada término. Dentro del corchete, \(a^2\cdot\frac{1}{a} = a\) y
+        \(a^2\cdot\frac{b}{a^2} = b\). Así obtenemos la forma compacta.
+      </div>
+    </div>
+
+    <div class="resultado-final">
+      <strong>Resultado:</strong> \(\displaystyle\int e^{ax}\cos(bx)\,dx = \frac{e^{ax}}{a^2+b^2}\left[a\cos(bx) + b\sin(bx)\right] + C\)
+    </div>
+  </div>
+</section>
+
+<footer>Módulo 14 · Cálculo Integral</footer>
+
+<script>
+  // ---------- Funciones de referencia: f(x) = x·arctan(x) ----------
+  // Antiderivada por partes: F(x) = (x²+1)/2 · arctan(x) − x/2
+  const f = x => x * Math.atan(x);
+  const F = x => ((x * x + 1) / 2) * Math.atan(x) - x / 2;
+
+  // ---------- Reglas de LIATE ----------
+  // Orden de prioridad: L (1) < I (2) < A (3) < T (4) < E (5). Menor número = va primero como u.
+  const PRIORIDAD = { L: 1, I: 2, A: 3, T: 4, E: 5 };
+  const NOMBRES = {
+    L: { nombre: "Logarítmica", latex: "\\ln x" },
+    I: { nombre: "Inversa trigonométrica", latex: "\\arctan x" },
+    A: { nombre: "Algebraica", latex: "x" },
+    T: { nombre: "Trigonométrica", latex: "\\sin x" },
+    E: { nombre: "Exponencial", latex: "e^x" }
+  };
+
+  // ---------- Elementos ----------
+  const select1 = document.getElementById("select-1");
+  const select2 = document.getElementById("select-2");
+  const btnLiate = document.getElementById("btn-liate");
+  const cajaU = document.getElementById("caja-u");
+  const cajaDv = document.getElementById("caja-dv");
+  const exprU = document.getElementById("expr-u");
+  const exprDv = document.getElementById("expr-dv");
+  const mensajeLiate = document.getElementById("mensaje-liate");
+  const sliderA = document.getElementById("slider-a");
+  const sliderB = document.getElementById("slider-b");
+  const valorA = document.getElementById("valor-a");
+  const valorB = document.getElementById("valor-b");
+  const salidaAntiderivada = document.getElementById("salida-antiderivada");
+  const salidaIntegral = document.getElementById("salida-integral");
+  const areaNumerica = document.getElementById("area-numerica");
+
+  // ---------- Utilidades ----------
+  function tex(elemento, latex) {
+    if (window.katex) {
+      katex.render(latex, elemento, { throwOnError: false, displayMode: true });
+    } else {
+      elemento.textContent = latex;
+    }
+  }
+
+  function puntos(fn, desde, hasta, n = 300) {
+    const xs = [], ys = [];
+    for (let i = 0; i <= n; i++) {
+      const t = desde + (hasta - desde) * i / n;
+      xs.push(t);
+      ys.push(fn(t));
+    }
+    return { xs, ys };
+  }
+
+  const layoutBase = {
+    paper_bgcolor: "rgba(0,0,0,0)",
+    plot_bgcolor: "rgba(0,0,0,0)",
+    font: { color: "#ffffff" },
+    margin: { l: 55, r: 25, t: 20, b: 50 },
+    showlegend: false,
+    xaxis: { gridcolor: "rgba(255,255,255,0.12)", zerolinecolor: "rgba(255,255,255,0.4)" },
+    yaxis: { gridcolor: "rgba(255,255,255,0.12)", zerolinecolor: "rgba(255,255,255,0.4)" }
+  };
+  const config = { responsive: true, displayModeBar: false };
+
+  // ---------- Asistente LIATE ----------
+  function aplicarLiate() {
+    const t1 = select1.value;
+    const t2 = select2.value;
+
+    // Si el usuario elige el mismo tipo dos veces, no hay regla que decidir
+    if (t1 === t2) {
+      cajaU.classList.remove("activa-u");
+      cajaDv.classList.remove("activa-dv");
+      exprU.textContent = "—";
+      exprDv.textContent = "—";
+      mensajeLiate.innerHTML =
+        "Elige <strong>dos tipos distintos</strong>. LIATE compara dos funciones; con el mismo tipo no hay orden que decidir.";
+      return;
+    }
+
+    // Quien tiene menor prioridad numérica es u
+    const uTipo = PRIORIDAD[t1] < PRIORIDAD[t2] ? t1 : t2;
+    const dvTipo = uTipo === t1 ? t2 : t1;
+
+    const nU = NOMBRES[uTipo], nDv = NOMBRES[dvTipo];
+
+    // Resaltar cajas
+    cajaU.classList.add("activa-u");
+    cajaDv.classList.add("activa-dv");
+    cajaU.classList.remove("activa-dv");
+    cajaDv.classList.remove("activa-u");
+
+    tex(exprU, `u = ${nU.latex}`);
+    tex(exprDv, `dv = ${nDv.latex}\\,dx`);
+
+    // Mensaje explicativo
+    const letras = `${uTipo} (${nU.nombre}) viene antes que ${dvTipo} (${nDv.nombre}) en LIATE`;
+    mensajeLiate.innerHTML =
+      `<strong>${letras}</strong>, por lo tanto <strong>u = ${nU.latex}</strong> y ` +
+      `<strong>dv = ${nDv.latex}\\,dx</strong>. La función u se deriva y la función dv se integra.`;
+
+    // Refrescar render de KaTeX dentro del mensaje
+    if (window.renderMathInElement) {
+      renderMathInElement(mensajeLiate, {
+        delimiters: [{ left: "\\(", right: "\\)", display: false }],
+        throwOnError: false
+      });
+    }
+  }
+
+  // ---------- Gráfica y cálculo ----------
+  function actualizarGrafica() {
+    let a = parseFloat(sliderA.value);
+    let b = parseFloat(sliderB.value);
+    valorA.textContent = a.toFixed(1);
+    valorB.textContent = b.toFixed(1);
+
+    const invertido = a > b;
+    const lo = Math.min(a, b), hi = Math.max(a, b);
+
+    // Curva original
+    const curva = puntos(f, -3.5, 3.5, 400);
+    // Sombreado entre lo y hi
+    const sombra = puntos(f, lo, hi, 250);
+
+    const ymin = Math.min(...curva.ys), ymax = Math.max(...curva.ys);
+    const pad = (ymax - ymin) * 0.1;
+
+    Plotly.react("grafica", [
+      { x: curva.xs, y: curva.ys, mode: "lines",
+        line: { color: "#ffffff", width: 2.5 }, hoverinfo: "skip" },
+      { x: sombra.xs, y: sombra.ys, mode: "lines", fill: "tozeroy",
+        fillcolor: "rgba(0,229,255,0.45)", line: { color: "#00e5ff", width: 1.5 }, hoverinfo: "skip" }
+    ], {
+      ...layoutBase,
+      xaxis: { ...layoutBase.xaxis, title: "x", range: [-3.5, 3.5] },
+      yaxis: { ...layoutBase.yaxis, title: "f(x) = x·arctan(x)", range: [ymin - pad, ymax + pad] },
+      shapes: [
+        { type: "line", x0: lo, x1: lo, y0: ymin - pad, y1: ymax + pad, line: { color: "#ff3cac", dash: "dot", width: 1.5 } },
+        { type: "line", x0: hi, x1: hi, y0: ymin - pad, y1: ymax + pad, line: { color: "#ff3cac", dash: "dot", width: 1.5 } }
+      ]
+    }, config);
+
+    // Antiderivada obtenida por partes
+    tex(salidaAntiderivada,
+      `\\int x\\arctan x\\,dx = \\frac{x^2+1}{2}\\arctan x - \\frac{x}{2} + C`);
+
+    // Integral definida F(b) − F(a)
+    const valor = F(hi) - F(lo);
+    const valorReal = invertido ? -valor : valor;
+
+    tex(salidaIntegral,
+      `\\int_{${a.toFixed(1)}}^{${b.toFixed(1)}} x\\arctan x\\,dx
+       = \\left[\\frac{x^2+1}{2}\\arctan x - \\frac{x}{2}\\right]_{${a.toFixed(1)}}^{${b.toFixed(1)}}
+       = ${valorReal.toFixed(4)}`);
+
+    areaNumerica.innerHTML =
+      `Valor del área (integral definida): <strong>${valorReal.toFixed(4)}</strong>` +
+      (invertido ? `<br><span style="color:#ffd166;font-size:0.95rem">a > b: el signo se invierte.</span>` : "");
+  }
+
+  // ---------- Arranque ----------
+  window.addEventListener("load", () => {
+    if (window.renderMathInElement) {
+      renderMathInElement(document.body, {
+        delimiters: [
+          { left: "\\(", right: "\\)", display: false },
+          { left: "\\[", right: "\\]", display: true }
+        ],
+        throwOnError: false
+      });
+    }
+
+    btnLiate.addEventListener("click", aplicarLiate);
+
+    if (typeof Plotly === "undefined") {
+      document.getElementById("grafica").innerHTML =
+        '<p class="error-cdn">No se cargó Plotly. Revisa tu conexión a internet.</p>';
+    } else {
+      sliderA.addEventListener("input", actualizarGrafica);
+      sliderB.addEventListener("input", actualizarGrafica);
+      actualizarGrafica();
+    }
+  });
+</script>
+
 </body>
 </html>
