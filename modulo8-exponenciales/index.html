@@ -1,23 +1,522 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Módulo 7 - Próximamente</title>
-    <style>
-        body { font-family: sans-serif; background: #1e3c72; color: white; display: flex; justify-content: center; align-items: center; min-height: 100vh; text-align: center; }
-        .container { padding: 40px; }
-        h1 { font-size: 3em; margin-bottom: 20px; }
-        p { font-size: 1.3em; margin-bottom: 30px; }
-        a { color: #ffd700; text-decoration: none; font-size: 1.2em; }
-        a:hover { text-decoration: underline; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Módulo 8: Integrales Exponenciales</title>
+
+<!-- KaTeX (CSS, núcleo y auto-render) -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+
+<!-- Plotly.js -->
+<script defer src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --azul-1: #0b1d3a;
+    --azul-2: #13315c;
+    --azul-3: #1e4a80;
+    --acento-azul: #4da3ff;
+    --acento-verde: #3ddc97;
+    --cian: #00e5ff;
+    --texto-suave: rgba(255, 255, 255, 0.78);
+    --vidrio: rgba(255, 255, 255, 0.08);
+    --vidrio-borde: rgba(255, 255, 255, 0.18);
+  }
+
+  body {
+    font-family: "Segoe UI", Roboto, Arial, sans-serif;
+    color: #ffffff;
+    background: linear-gradient(135deg, var(--azul-1) 0%, var(--azul-2) 50%, var(--azul-3) 100%);
+    background-attachment: fixed;
+    min-height: 100vh;
+    line-height: 1.6;
+    padding: 90px 20px 40px;
+  }
+
+  .btn-volver {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    z-index: 1000;
+    padding: 10px 18px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.12);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid var(--vidrio-borde);
+    color: #fff;
+    text-decoration: none;
+    font-weight: 600;
+  }
+  .btn-volver:hover { background: rgba(255, 255, 255, 0.22); }
+
+  header { text-align: center; margin-bottom: 40px; }
+  header h1 { font-size: 2.2rem; margin-bottom: 8px; }
+  header p { color: var(--texto-suave); }
+
+  .card {
+    max-width: 1100px;
+    margin: 0 auto 30px;
+    padding: 28px 32px;
+    background: var(--vidrio);
+    border: 1px solid var(--vidrio-borde);
+    border-radius: 20px;
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+  }
+  .card h2 {
+    font-size: 1.6rem;
+    margin-bottom: 14px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--vidrio-borde);
+  }
+  .card h3 { font-size: 1.2rem; margin: 22px 0 10px; color: var(--acento-azul); }
+  .card p { margin-bottom: 12px; color: var(--texto-suave); }
+  .card strong { color: #fff; }
+
+  .formula-destacada {
+    text-align: center;
+    background: rgba(0, 0, 0, 0.25);
+    border-radius: 14px;
+    padding: 16px;
+    margin: 14px 0;
+    overflow-x: auto;
+    font-size: 1.15rem;
+  }
+
+  .nota {
+    background: rgba(61, 220, 151, 0.12);
+    border-left: 4px solid var(--acento-verde);
+    padding: 12px 16px;
+    border-radius: 10px;
+    margin: 14px 0;
+    color: var(--texto-suave);
+  }
+
+  .controles {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 14px;
+    padding: 20px;
+    margin-bottom: 22px;
+  }
+  .control-fila {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 12px;
+  }
+  .control-fila label { min-width: 150px; font-weight: 600; font-size: 1.02rem; }
+  .control-fila input[type="range"] { flex: 1; min-width: 180px; accent-color: var(--cian); }
+  .valor {
+    font-family: Consolas, monospace;
+    background: rgba(255, 255, 255, 0.12);
+    padding: 4px 10px;
+    border-radius: 8px;
+    min-width: 70px;
+    text-align: center;
+  }
+
+  .grafica-caja { background: rgba(0, 0, 0, 0.2); border-radius: 14px; padding: 10px; }
+  #grafica { width: 100%; height: 400px; }
+
+  .resultados {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+    margin-top: 22px;
+  }
+  .panel { background: rgba(0, 0, 0, 0.2); border-radius: 14px; padding: 18px; }
+  .panel h4 { margin-bottom: 10px; color: var(--acento-azul); }
+  .panel.cian h4 { color: var(--cian); }
+  .panel .salida { overflow-x: auto; font-size: 1.15rem; }
+
+  .valor-grande {
+    text-align: center;
+    font-size: 1.4rem;
+    margin-top: 16px;
+    padding: 16px;
+    background: rgba(0, 229, 255, 0.1);
+    border: 1px solid rgba(0, 229, 255, 0.35);
+    border-radius: 14px;
+  }
+  .error-cdn { color: #ff8a8a; font-weight: 600; }
+
+  .ejemplo-titulo { font-size: 1.3rem; color: var(--acento-verde); margin-bottom: 12px; }
+  .bloque-paso {
+    background: rgba(0, 0, 0, 0.22);
+    border-radius: 14px;
+    padding: 16px 20px;
+    margin: 14px 0;
+    overflow-x: auto;
+  }
+  .bloque-paso .titulo-paso { font-weight: 700; color: var(--acento-azul); margin-bottom: 6px; }
+  .bloque-paso .explica { color: var(--texto-suave); font-size: 0.97rem; margin-top: 8px; }
+  .resultado-final {
+    text-align: center;
+    background: rgba(61, 220, 151, 0.15);
+    border: 1px solid rgba(61, 220, 151, 0.4);
+    border-radius: 14px;
+    padding: 16px;
+    margin-top: 16px;
+    font-size: 1.1rem;
+  }
+
+  footer { text-align: center; color: var(--texto-suave); font-size: 0.9rem; margin-top: 20px; }
+
+  @media (max-width: 800px) {
+    .resultados { grid-template-columns: 1fr; }
+    #grafica { height: 300px; }
+    header h1 { font-size: 1.7rem; }
+    .card { padding: 20px; }
+    .control-fila label { min-width: 100%; }
+    body { padding: 80px 12px 30px; }
+  }
+</style>
 </head>
 <body>
-    <div class="container">
-        <h1>🚧 Próximamente</h1>
-        <p>Este módulo estará disponible en la <strong>Fase 2</strong> del proyecto.</p>
-        <a href="../index.html">← Volver al menú principal</a>
+
+<a href="../index.html" class="btn-volver">← Volver al menú</a>
+
+<header>
+  <h1>Módulo 8: Integrales Exponenciales</h1>
+  <p>Teoría, laboratorio interactivo y ejemplos resueltos</p>
+</header>
+
+<!-- ================= SECCIÓN 1: TEORÍA ================= -->
+<section class="card" id="seccion-teoria">
+  <h2>Sección 1: Teoría y Fórmulas Básicas</h2>
+
+  <p>
+    Una función exponencial tiene la variable en el exponente. Su integral se obtiene
+    recordando que <strong>la derivada de \(e^u\) es \(e^u\) multiplicada por la derivada de \(u\)</strong>.
+    Al revertir ese proceso, aparece la fórmula básica:
+  </p>
+
+  <div class="formula-destacada">
+    \(\int e^u\,du = e^u + C\)
+  </div>
+
+  <p>
+    Para una base <em>a</em> distinta de <em>e</em> (con \(a > 0\) y \(a \neq 1\)) usamos el hecho de que
+    \(\frac{d}{dx}(a^x) = a^x \ln a\). Dividiendo entre \(\ln a\) se obtiene:
+  </p>
+
+  <div class="formula-destacada">
+    \(\int a^x\,dx = \frac{a^x}{\ln a} + C \qquad (a > 0,\ a \neq 1)\)
+  </div>
+
+  <div class="nota">
+    <strong>Diferencia clave:</strong> al integrar \(e^x\), la función se queda igual: \(\int e^x\,dx = e^x + C\),
+    porque \(\ln e = 1\) y no hay que dividir entre nada. Al integrar \(a^x\) con base distinta de \(e\),
+    aparece el factor \(\frac{1}{\ln a}\), que corrige la derivada \(\ln a\) que se genera al derivar \(a^x\).
+  </div>
+</section>
+
+<!-- ================= SECCIÓN 2: LABORATORIO ================= -->
+<section class="card" id="seccion-laboratorio">
+  <h2>Sección 2: Laboratorio Interactivo</h2>
+
+  <p>
+    Observa la curva \(f(x) = a^x\). Cambia la base <em>a</em> y los límites <em>b</em> y <em>c</em>
+    para ver cómo cambia el área bajo la curva entre <em>b</em> y <em>c</em>.
+  </p>
+
+  <div class="controles">
+    <div class="control-fila">
+      <label for="slider-base">Base a =</label>
+      <input type="range" id="slider-base" min="0.1" max="5" step="0.1" value="2">
+      <span class="valor" id="valor-base">2.0</span>
     </div>
+    <div class="control-fila">
+      <label for="slider-b">Límite inferior b =</label>
+      <input type="range" id="slider-b" min="-3" max="3" step="0.1" value="-1">
+      <span class="valor" id="valor-b">-1.0</span>
+    </div>
+    <div class="control-fila">
+      <label for="slider-c">Límite superior c =</label>
+      <input type="range" id="slider-c" min="-3" max="3" step="0.1" value="1">
+      <span class="valor" id="valor-c">1.0</span>
+    </div>
+    <p class="nota" id="aviso" style="display:none;"></p>
+  </div>
+
+  <div class="grafica-caja">
+    <div id="grafica"></div>
+  </div>
+
+  <div class="resultados">
+    <div class="panel">
+      <h4>Antiderivada con los valores actuales</h4>
+      <div class="salida" id="salida-antiderivada"></div>
+    </div>
+    <div class="panel cian">
+      <h4>Integral definida</h4>
+      <div class="salida" id="salida-integral"></div>
+    </div>
+  </div>
+
+  <div class="valor-grande" id="area-numerica"></div>
+</section>
+
+<!-- ================= SECCIÓN 3: EJEMPLOS ================= -->
+<section class="card" id="seccion-ejemplos">
+  <h2>Sección 3: Ejemplos Resueltos Paso a Paso</h2>
+
+  <!-- EJEMPLO 1 -->
+  <div id="ejemplo-1">
+    <h3 class="ejemplo-titulo">Ejemplo 1: \(\int (e^{2x} + 3e^x)\,dx\)</h3>
+
+    <div class="bloque-paso">
+      <div class="titulo-paso">Paso 1: Separar término a término</div>
+      <div>\(\int (e^{2x} + 3e^x)\,dx = \int e^{2x}\,dx + \int 3e^x\,dx\)</div>
+      <div class="explica">
+        Usamos la propiedad de linealidad: la integral de una suma es la suma de las integrales, y una constante
+        (\(3\)) puede salir de la integral.
+      </div>
+    </div>
+
+    <div class="bloque-paso">
+      <div class="titulo-paso">Paso 2: Integrar \(e^{2x}\) con regla de la cadena inversa</div>
+      <div>\(\int e^{2x}\,dx = \frac{1}{2}e^{2x} + C_1\)</div>
+      <div class="explica">
+        Sea \(u = 2x\), entonces \(du = 2\,dx\) y \(dx = \frac{du}{2}\). Reemplazamos:
+        \(\int e^{u}\cdot\frac{du}{2} = \frac{1}{2}\int e^u\,du = \frac{1}{2}e^u + C_1 = \frac{1}{2}e^{2x} + C_1\).
+        El <strong>1/2</strong> aparece porque \(du = 2\,dx\): la derivada interna del exponente (el 2) debe dividirse.
+      </div>
+    </div>
+
+    <div class="bloque-paso">
+      <div class="titulo-paso">Paso 3: Integrar \(3e^x\)</div>
+      <div>\(\int 3e^x\,dx = 3\int e^x\,dx = 3e^x + C_2\)</div>
+      <div class="explica">
+        Aquí la derivada interna es 1, así que no hay factor adicional. El \(3\) se conserva por linealidad.
+      </div>
+    </div>
+
+    <div class="bloque-paso">
+      <div class="titulo-paso">Paso 4: Resultado final</div>
+      <div>\(\int (e^{2x} + 3e^x)\,dx = \frac{1}{2}e^{2x} + 3e^x + C\)</div>
+      <div class="explica">Las constantes \(C_1\) y \(C_2\) se agrupan en una sola constante \(C = C_1 + C_2\).</div>
+    </div>
+
+    <div class="resultado-final">
+      <strong>Comprobación:</strong> \(\frac{d}{dx}\left(\frac{1}{2}e^{2x} + 3e^x\right) = \frac{1}{2}\cdot 2e^{2x} + 3e^x = e^{2x} + 3e^x\) ✔
+    </div>
+  </div>
+
+  <!-- EJEMPLO 2 -->
+  <div id="ejemplo-2" style="margin-top: 40px;">
+    <h3 class="ejemplo-titulo">Ejemplo 2: \(\int \frac{dx}{e^x + e^{-x}}\)</h3>
+
+    <div class="bloque-paso">
+      <div class="titulo-paso">Paso 1: Multiplicar numerador y denominador por \(e^x\)</div>
+      <div>\(\int \frac{dx}{e^x + e^{-x}} = \int \frac{e^x}{e^x\left(e^x + e^{-x}\right)}\,dx\)</div>
+      <div>\(= \int \frac{e^x}{e^{2x} + e^{0}}\,dx\)</div>
+      <div class="explica">
+        Multiplicamos arriba y abajo por \(e^x\) (esto no cambia el valor, porque \(\frac{e^x}{e^x} = 1\)).
+        Al distribuir en el denominador, \(e^x\cdot e^x = e^{2x}\) y \(e^x\cdot e^{-x} = e^{0} = 1\), por la ley de exponentes
+        \(a^m\cdot a^n = a^{m+n}\).
+      </div>
+    </div>
+
+    <div class="bloque-paso">
+      <div class="titulo-paso">Paso 2: Simplificar el denominador</div>
+      <div>\(\int \frac{e^x}{e^{2x} + 1}\,dx\)</div>
+      <div class="explica">Como \(e^0 = 1\), el denominador queda \(e^{2x} + 1\).</div>
+    </div>
+
+    <div class="bloque-paso">
+      <div class="titulo-paso">Paso 3: Sustitución \(u = e^x\)</div>
+      <div>\(u = e^x \quad \Rightarrow \quad du = e^x\,dx \quad \Rightarrow \quad e^x\,dx = du\)</div>
+      <div>\(e^{2x} = (e^x)^2 = u^2\)</div>
+      <div>\(\int \frac{e^x}{e^{2x}+1}\,dx = \int \frac{du}{u^2 + 1}\)</div>
+      <div class="explica">
+        La derivada de \(e^x\) es \(e^x\), que aparece exactamente en el numerador, así que \(e^x\,dx\) se convierte
+        en \(du\) sin constante adicional. El \(e^{2x}\) se reescribe como \(u^2\) usando \((a^m)^n = a^{mn}\).
+      </div>
+    </div>
+
+    <div class="bloque-paso">
+      <div class="titulo-paso">Paso 4: Integrar la fórmula del arcotangente</div>
+      <div>\(\int \frac{du}{u^2 + 1} = \arctan(u) + C\)</div>
+      <div class="explica">Esta es una fórmula estándar de integrales trigonométricas inversas.</div>
+    </div>
+
+    <div class="bloque-paso">
+      <div class="titulo-paso">Paso 5: Volver a la variable x</div>
+      <div>\(\int \frac{dx}{e^x + e^{-x}} = \arctan(e^x) + C\)</div>
+    </div>
+
+    <div class="resultado-final">
+      <strong>Comprobación:</strong> \(\frac{d}{dx}\arctan(e^x) = \frac{1}{1+(e^x)^2}\cdot e^x = \frac{e^x}{e^{2x}+1} = \frac{1}{e^x+e^{-x}}\) ✔
+    </div>
+  </div>
+</section>
+
+<footer>Módulo 8 · Cálculo Integral</footer>
+
+<script>
+  // ---------- Funciones ----------
+  // Antiderivada de a^x: F(x) = a^x / ln(a)
+  const F = (a, x) => Math.pow(a, x) / Math.log(a);
+  // Función original: f(x) = a^x
+  const f = (a, x) => Math.pow(a, x);
+
+  // ---------- Elementos ----------
+  const sliderBase = document.getElementById("slider-base");
+  const sliderB = document.getElementById("slider-b");
+  const sliderC = document.getElementById("slider-c");
+  const valorBase = document.getElementById("valor-base");
+  const valorB = document.getElementById("valor-b");
+  const valorC = document.getElementById("valor-c");
+  const aviso = document.getElementById("aviso");
+  const salidaAntiderivada = document.getElementById("salida-antiderivada");
+  const salidaIntegral = document.getElementById("salida-integral");
+  const areaNumerica = document.getElementById("area-numerica");
+
+  // ---------- Utilidades ----------
+  function tex(elemento, latex) {
+    if (window.katex) {
+      katex.render(latex, elemento, { throwOnError: false, displayMode: true });
+    } else {
+      elemento.textContent = latex;
+    }
+  }
+
+  function puntos(fn, desde, hasta, n = 300) {
+    const xs = [], ys = [];
+    for (let i = 0; i <= n; i++) {
+      const t = desde + (hasta - desde) * i / n;
+      xs.push(t);
+      ys.push(fn(t));
+    }
+    return { xs, ys };
+  }
+
+  // Número con formato corto para LaTeX
+  const fmt = n => Number(n).toFixed(2);
+
+  // ---------- Dibujo y cálculos ----------
+  function actualizar() {
+    const a = parseFloat(sliderBase.value);
+    let b = parseFloat(sliderB.value);
+    let c = parseFloat(sliderC.value);
+
+    valorBase.textContent = a.toFixed(1);
+    valorB.textContent = b.toFixed(1);
+    valorC.textContent = c.toFixed(1);
+
+    // Restricción: c > b. Si no se cumple, se ajusta c y se avisa.
+    if (c <= b) {
+      c = b + 0.1;
+      if (c > 3) { c = 3; b = 2.9; }
+      sliderC.value = c.toFixed(1);
+      sliderB.value = b.toFixed(1);
+      valorB.textContent = b.toFixed(1);
+      valorC.textContent = c.toFixed(1);
+      aviso.style.display = "block";
+      aviso.textContent = "El límite superior c debe ser mayor que b; se ajustó automáticamente.";
+    } else {
+      aviso.style.display = "none";
+    }
+
+    // Caso especial: a = 1 no está permitido (no hay exponencial). Se evita con el paso de 0.1.
+    // Aun así, si aparece 1 se muestra un aviso.
+    const baseValida = Math.abs(a - 1) > 1e-9;
+
+    // Rango del eje x para la gráfica
+    const xMin = -3.5, xMax = 3.5;
+    const curva = puntos(x => f(a, x), xMin, xMax, 400);
+
+    // Sombreado entre b y c
+    const sombra = puntos(x => f(a, x), b, c, 200);
+
+    // Límite de escala en y para que la gráfica no salte demasiado
+    const yMax = Math.max(f(a, xMax), f(a, xMin), 2);
+    const yRango = [0, Math.min(yMax, 60) * 1.05];
+
+    Plotly.react("grafica", [
+      {
+        x: curva.xs, y: curva.ys, mode: "lines",
+        line: { color: "#ffffff", width: 2.5 },
+        name: "f(x) = a^x", hoverinfo: "skip"
+      },
+      {
+        x: sombra.xs, y: sombra.ys, mode: "lines", fill: "tozeroy",
+        fillcolor: "rgba(0,255,170,0.45)",
+        line: { color: "#00ffaa", width: 1.5 },
+        name: "Área", hoverinfo: "skip"
+      }
+    ], {
+      paper_bgcolor: "rgba(0,0,0,0)",
+      plot_bgcolor: "rgba(0,0,0,0)",
+      font: { color: "#ffffff" },
+      margin: { l: 55, r: 25, t: 20, b: 50 },
+      showlegend: false,
+      xaxis: {
+        title: "x", range: [xMin, xMax],
+        gridcolor: "rgba(255,255,255,0.12)", zerolinecolor: "rgba(255,255,255,0.4)"
+      },
+      yaxis: {
+        title: "f(x)", range: yRango,
+        gridcolor: "rgba(255,255,255,0.12)", zerolinecolor: "rgba(255,255,255,0.4)"
+      },
+      shapes: [
+        { type: "line", x0: b, x1: b, y0: 0, y1: yRango[1], line: { color: "#ffd166", dash: "dot", width: 1.5 } },
+        { type: "line", x0: c, x1: c, y0: 0, y1: yRango[1], line: { color: "#ffd166", dash: "dot", width: 1.5 } }
+      ]
+    }, { responsive: true, displayModeBar: false });
+
+    // ---------- Antiderivada ----------
+    if (baseValida) {
+      tex(salidaAntiderivada,
+        `F(x) = \\frac{${a.toFixed(1)}^x}{\\ln(${a.toFixed(1)})} + C
+         \\quad \\Rightarrow \\quad
+         \\ln(${a.toFixed(1)}) = ${Math.log(a).toFixed(4)}`);
+    } else {
+      tex(salidaAntiderivada, `\\text{La base no puede ser } 1`);
+    }
+
+    // ---------- Integral definida ----------
+    const area = F(a, c) - F(a, b);
+    tex(salidaIntegral,
+      `\\int_{${b.toFixed(1)}}^{${c.toFixed(1)}} ${a.toFixed(1)}^x\\,dx
+       = \\left[\\frac{${a.toFixed(1)}^x}{\\ln(${a.toFixed(1)})}\\right]_{${b.toFixed(1)}}^{${c.toFixed(1)}}`);
+
+    areaNumerica.innerHTML =
+      `Valor del área: <strong>${area.toFixed(4)}</strong> unidades cuadradas`;
+  }
+
+  // ---------- Arranque ----------
+  window.addEventListener("load", () => {
+    if (window.renderMathInElement) {
+      renderMathInElement(document.body, {
+        delimiters: [
+          { left: "\\(", right: "\\)", display: false },
+          { left: "\\[", right: "\\]", display: true }
+        ],
+        throwOnError: false
+      });
+    }
+
+    if (typeof Plotly === "undefined") {
+      document.getElementById("grafica").innerHTML =
+        '<p class="error-cdn">No se cargó Plotly. Revisa tu conexión a internet.</p>';
+    } else {
+      sliderBase.addEventListener("input", actualizar);
+      sliderB.addEventListener("input", actualizar);
+      sliderC.addEventListener("input", actualizar);
+      actualizar();
+    }
+  });
+</script>
+
 </body>
 </html>
