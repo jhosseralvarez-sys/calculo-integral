@@ -1,23 +1,602 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Módulo 7 - Próximamente</title>
-    <style>
-        body { font-family: sans-serif; background: #1e3c72; color: white; display: flex; justify-content: center; align-items: center; min-height: 100vh; text-align: center; }
-        .container { padding: 40px; }
-        h1 { font-size: 3em; margin-bottom: 20px; }
-        p { font-size: 1.3em; margin-bottom: 30px; }
-        a { color: #ffd700; text-decoration: none; font-size: 1.2em; }
-        a:hover { text-decoration: underline; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Módulo 10: Integrales Trigonométricas</title>
+
+<!-- KaTeX (CSS, núcleo y auto-render) -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+
+<!-- Plotly.js -->
+<script defer src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --azul-1: #0b1d3a;
+    --azul-2: #13315c;
+    --azul-3: #1e4a80;
+    --acento-azul: #4da3ff;
+    --acento-verde: #3ddc97;
+    --cian: #00e5ff;
+    --magenta: #ff3cac;
+    --texto-suave: rgba(255, 255, 255, 0.78);
+    --vidrio: rgba(255, 255, 255, 0.08);
+    --vidrio-borde: rgba(255, 255, 255, 0.18);
+  }
+
+  body {
+    font-family: "Segoe UI", Roboto, Arial, sans-serif;
+    color: #ffffff;
+    background: linear-gradient(135deg, var(--azul-1) 0%, var(--azul-2) 50%, var(--azul-3) 100%);
+    background-attachment: fixed;
+    min-height: 100vh;
+    line-height: 1.6;
+    padding: 90px 20px 40px;
+  }
+
+  .btn-volver {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    z-index: 1000;
+    padding: 10px 18px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.12);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid var(--vidrio-borde);
+    color: #fff;
+    text-decoration: none;
+    font-weight: 600;
+  }
+  .btn-volver:hover { background: rgba(255, 255, 255, 0.22); }
+
+  header { text-align: center; margin-bottom: 40px; }
+  header h1 { font-size: 2.2rem; margin-bottom: 8px; }
+  header p { color: var(--texto-suave); }
+
+  .card {
+    max-width: 1100px;
+    margin: 0 auto 30px;
+    padding: 28px 32px;
+    background: var(--vidrio);
+    border: 1px solid var(--vidrio-borde);
+    border-radius: 20px;
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+  }
+  .card h2 {
+    font-size: 1.6rem;
+    margin-bottom: 14px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--vidrio-borde);
+  }
+  .card h3 { font-size: 1.2rem; margin: 22px 0 10px; color: var(--acento-azul); }
+  .card p { margin-bottom: 12px; color: var(--texto-suave); }
+  .card strong { color: #fff; }
+
+  .tabla-formulas { width: 100%; border-collapse: collapse; margin: 14px 0; }
+  .tabla-formulas td {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--vidrio-borde);
+    color: #fff;
+  }
+  .tabla-formulas tr:last-child td { border-bottom: none; }
+  .tabla-formulas td:last-child { text-align: right; font-size: 1.05rem; }
+
+  .nota {
+    background: rgba(61, 220, 151, 0.12);
+    border-left: 4px solid var(--acento-verde);
+    padding: 12px 16px;
+    border-radius: 10px;
+    margin: 14px 0;
+    color: var(--texto-suave);
+  }
+
+  .controles {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 14px;
+    padding: 20px;
+    margin-bottom: 22px;
+  }
+  .control-fila {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 12px;
+  }
+  .control-fila label { min-width: 150px; font-weight: 600; font-size: 1.02rem; }
+  .control-fila input[type="range"] { flex: 1; min-width: 180px; accent-color: var(--cian); }
+  .control-fila select {
+    flex: 1;
+    min-width: 180px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: 1px solid var(--vidrio-borde);
+    background: rgba(255, 255, 255, 0.12);
+    color: #fff;
+    font-size: 1rem;
+    cursor: pointer;
+  }
+  .control-fila select option { background: #13315c; color: #fff; }
+  .valor {
+    font-family: Consolas, monospace;
+    background: rgba(255, 255, 255, 0.12);
+    padding: 4px 10px;
+    border-radius: 8px;
+    min-width: 80px;
+    text-align: center;
+  }
+
+  .grafica-caja { background: rgba(0, 0, 0, 0.2); border-radius: 14px; padding: 10px; }
+  #grafica { width: 100%; height: 400px; }
+
+  .resultados {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+    margin-top: 22px;
+  }
+  .panel { background: rgba(0, 0, 0, 0.2); border-radius: 14px; padding: 18px; }
+  .panel h4 { margin-bottom: 10px; color: var(--acento-azul); }
+  .panel.magenta h4 { color: var(--magenta); }
+  .panel .salida { overflow-x: auto; font-size: 1.2rem; }
+
+  .valor-grande {
+    text-align: center;
+    font-size: 1.4rem;
+    margin-top: 16px;
+    padding: 16px;
+    background: rgba(0, 229, 255, 0.1);
+    border: 1px solid rgba(0, 229, 255, 0.35);
+    border-radius: 14px;
+  }
+  .aviso { color: #ffd166; font-size: 1rem; margin-top: 8px; }
+  .error-cdn { color: #ff8a8a; font-weight: 600; }
+
+  .ejemplo-titulo { font-size: 1.3rem; color: var(--acento-verde); margin-bottom: 12px; }
+  .bloque-paso {
+    background: rgba(0, 0, 0, 0.22);
+    border-radius: 14px;
+    padding: 16px 20px;
+    margin: 14px 0;
+    overflow-x: auto;
+  }
+  .bloque-paso .titulo-paso { font-weight: 700; color: var(--acento-azul); margin-bottom: 6px; }
+  .bloque-paso .explica { color: var(--texto-suave); font-size: 0.97rem; margin-top: 8px; }
+  .resultado-final {
+    text-align: center;
+    background: rgba(61, 220, 151, 0.15);
+    border: 1px solid rgba(61, 220, 151, 0.4);
+    border-radius: 14px;
+    padding: 16px;
+    margin-top: 16px;
+    font-size: 1.1rem;
+  }
+
+  footer { text-align: center; color: var(--texto-suave); font-size: 0.9rem; margin-top: 20px; }
+
+  @media (max-width: 800px) {
+    #grafica { height: 300px; }
+    header h1 { font-size: 1.7rem; }
+    .card { padding: 20px; }
+    .resultados { grid-template-columns: 1fr; }
+    .control-fila label { min-width: 100%; }
+    .tabla-formulas td:last-child { font-size: 0.95rem; }
+    body { padding: 80px 12px 30px; }
+  }
+</style>
 </head>
 <body>
-    <div class="container">
-        <h1>🚧 Próximamente</h1>
-        <p>Este módulo estará disponible en la <strong>Fase 2</strong> del proyecto.</p>
-        <a href="../index.html">← Volver al menú principal</a>
+
+<a href="../index.html" class="btn-volver">← Volver al menú</a>
+
+<header>
+  <h1>Módulo 10: Integrales Trigonométricas</h1>
+  <p>Teoría, laboratorio interactivo y ejemplos resueltos</p>
+</header>
+
+<!-- ================= SECCIÓN 1: TEORÍA ================= -->
+<section class="card" id="seccion-teoria">
+  <h2>Sección 1: Teoría y Fórmulas Básicas</h2>
+
+  <p>
+    Las integrales trigonométricas básicas son las inversas de las derivadas de las funciones trigonométricas.
+    Si recuerdas que \(\frac{d}{du}\cos u = -\sin u\) o que \(\frac{d}{du}\tan u = \sec^2 u\), puedes
+    revertir cada derivada para obtener la integral correspondiente.
+  </p>
+
+  <table class="tabla-formulas">
+    <tr><td>Seno</td><td>\(\int \sin u \, du = -\cos u + C\)</td></tr>
+    <tr><td>Coseno</td><td>\(\int \cos u \, du = \sin u + C\)</td></tr>
+    <tr><td>Tangente</td><td>\(\int \tan u \, du = -\ln|\cos u| + C\)</td></tr>
+    <tr><td>Secante cuadrada</td><td>\(\int \sec^2 u \, du = \tan u + C\)</td></tr>
+    <tr><td>Cosecante cuadrada</td><td>\(\int \csc^2 u \, du = -\cot u + C\)</td></tr>
+  </table>
+
+  <div class="nota">
+    <strong>Importancia de las identidades:</strong> muchas integrales no se resuelven directamente con estas
+    fórmulas. Antes de integrar conviene simplificar con identidades como
+    \(\sin^2 x + \cos^2 x = 1\), \(\tan x = \frac{\sin x}{\cos x}\) o las fórmulas de ángulo doble,
+    por ejemplo \(\sin 2x = 2\sin x\cos x\). Una expresión más simple casi siempre se integra con menos esfuerzo.
+  </div>
+</section>
+
+<!-- ================= SECCIÓN 2: LABORATORIO ================= -->
+<section class="card" id="seccion-laboratorio">
+  <h2>Sección 2: Laboratorio Interactivo</h2>
+
+  <p>
+    Elige una función y mueve los límites <em>a</em> y <em>b</em>. El área sombreada representa
+    \(\int_a^b f(x)\,dx = F(b) - F(a)\), calculada con la antiderivada exacta.
+  </p>
+
+  <div class="controles">
+    <div class="control-fila">
+      <label for="select-funcion">Función:</label>
+      <select id="select-funcion">
+        <option value="sen">f(x) = sin(x)</option>
+        <option value="cos">g(x) = cos(x)</option>
+        <option value="sen2">h(x) = sin²(x)</option>
+        <option value="tan">k(x) = tan(x)</option>
+      </select>
     </div>
+    <div class="control-fila">
+      <label for="slider-a">Límite a =</label>
+      <input type="range" id="slider-a" min="-3.14" max="3.14" step="0.01" value="-3.14">
+      <span class="valor" id="valor-a">-3.14</span>
+    </div>
+    <div class="control-fila">
+      <label for="slider-b">Límite b =</label>
+      <input type="range" id="slider-b" min="-3.14" max="3.14" step="0.01" value="3.14">
+      <span class="valor" id="valor-b">3.14</span>
+    </div>
+    <p class="aviso" id="aviso" style="display:none;"></p>
+  </div>
+
+  <div class="grafica-caja">
+    <div id="grafica"></div>
+  </div>
+
+  <div class="resultados">
+    <div class="panel">
+      <h4>Antiderivada F(x)</h4>
+      <div class="salida" id="salida-antiderivada"></div>
+    </div>
+    <div class="panel magenta">
+      <h4>Integral definida F(b) − F(a)</h4>
+      <div class="salida" id="salida-integral"></div>
+    </div>
+  </div>
+
+  <div class="valor-grande" id="area-numerica"></div>
+</section>
+
+<!-- ================= SECCIÓN 3: EJEMPLOS ================= -->
+<section class="card" id="seccion-ejemplos">
+  <h2>Sección 3: Ejemplos Resueltos Paso a Paso</h2>
+
+  <!-- EJEMPLO 1 -->
+  <div id="ejemplo-1">
+    <h3 class="ejemplo-titulo">Ejemplo 1: \(\int \sec^2 y \cos y \, dy\)</h3>
+
+    <div class="bloque-paso">
+      <div class="titulo-paso">Paso 1: Simplificar con identidades</div>
+      <div>\(\sec^2 y \cos y = \frac{1}{\cos^2 y}\cdot\cos y = \frac{1}{\cos y} = \sec y\)</div>
+      <div class="explica">
+        Usamos \(\sec y = \frac{1}{\cos y}\). Al elevar al cuadrado, \(\sec^2 y = \frac{1}{\cos^2 y}\).
+        Luego uno de los factores \(\cos y\) del denominador cancela con el \(\cos y\) del numerador.
+      </div>
+    </div>
+
+    <div class="bloque-paso">
+      <div class="titulo-paso">Paso 2: Integrar \(\sec y\)</div>
+      <div>\(\int \sec^2 y \cos y \, dy = \int \sec y \, dy = \ln|\sec y + \tan y| + C\)</div>
+      <div class="explica">
+        \(\int \sec y\,dy\) no se resuelve con una fórmula directa de tabla; se obtiene multiplicando y dividiendo por
+        \(\sec y + \tan y\). Es un resultado estándar que conviene memorizar.
+      </div>
+    </div>
+
+    <div class="resultado-final">
+      <strong>Resultado:</strong> \(\int \sec^2 y \cos y \, dy = \ln|\sec y + \tan y| + C\)
+    </div>
+  </div>
+
+  <!-- EJEMPLO 2 -->
+  <div id="ejemplo-2" style="margin-top: 40px;">
+    <h3 class="ejemplo-titulo">Ejemplo 2: \(\int (\cos x - \sin x)^2 \, dx\)</h3>
+
+    <div class="bloque-paso">
+      <div class="titulo-paso">Paso 1: Expandir el binomio al cuadrado</div>
+      <div>\((\cos x - \sin x)^2 = \cos^2 x - 2\sin x\cos x + \sin^2 x\)</div>
+      <div class="explica">
+        Aplicamos \((a - b)^2 = a^2 - 2ab + b^2\) con \(a = \cos x\) y \(b = \sin x\).
+      </div>
+    </div>
+
+    <div class="bloque-paso">
+      <div class="titulo-paso">Paso 2: Aplicar identidades</div>
+      <div>\(\cos^2 x + \sin^2 x = 1\) y \(2\sin x\cos x = \sin(2x)\)</div>
+      <div>\(\cos^2 x - 2\sin x\cos x + \sin^2 x = 1 - \sin(2x)\)</div>
+      <div class="explica">
+        La identidad pitagórica agrupa \(\cos^2 x + \sin^2 x\) en 1. La fórmula de ángulo doble transforma
+        \(2\sin x\cos x\) en \(\sin 2x\). El signo menos del término medio se conserva.
+      </div>
+    </div>
+
+    <div class="bloque-paso">
+      <div class="titulo-paso">Paso 3: Integrar término a término</div>
+      <div>\(\int (1 - \sin 2x)\,dx = \int 1\,dx - \int \sin 2x\,dx\)</div>
+      <div>\(\int 1\,dx = x\)</div>
+      <div>\(\int \sin 2x\,dx = -\frac{1}{2}\cos 2x\)</div>
+      <div class="explica">
+        Para \(\int \sin 2x\,dx\) usamos \(u = 2x\), \(du = 2\,dx\), así que \(dx = \frac{du}{2}\).
+        Entonces \(\int \sin u \cdot \frac{du}{2} = \frac{1}{2}(-\cos u) = -\frac{1}{2}\cos 2x\).
+        El \(\frac{1}{2}\) aparece porque \(du = 2\,dx\).
+      </div>
+    </div>
+
+    <div class="bloque-paso">
+      <div class="titulo-paso">Paso 4: Resultado final</div>
+      <div>\(\int (\cos x - \sin x)^2\,dx = x - \left(-\frac{1}{2}\cos 2x\right) + C = x + \frac{1}{2}\cos 2x + C\)</div>
+    </div>
+
+    <div class="resultado-final">
+      <strong>Comprobación:</strong> \(\frac{d}{dx}\left(x + \tfrac{1}{2}\cos 2x\right) = 1 - \sin 2x\) ✔
+    </div>
+  </div>
+
+  <!-- EJEMPLO 3 -->
+  <div id="ejemplo-3" style="margin-top: 40px;">
+    <h3 class="ejemplo-titulo">Ejemplo 3: \(\int \frac{dx}{\cos^2 x \sqrt{\tan x - 1}}\)</h3>
+
+    <div class="bloque-paso">
+      <div class="titulo-paso">Paso 1: Reconocer \(\sec^2 x\)</div>
+      <div>\(\frac{1}{\cos^2 x} = \sec^2 x\)</div>
+      <div class="explica">
+        Por definición \(\sec x = \frac{1}{\cos x}\), así que \(\sec^2 x = \frac{1}{\cos^2 x}\).
+        La integral queda \(\int \frac{\sec^2 x}{\sqrt{\tan x - 1}}\,dx\).
+      </div>
+    </div>
+
+    <div class="bloque-paso">
+      <div class="titulo-paso">Paso 2: Sustitución \(u = \tan x - 1\)</div>
+      <div>\(u = \tan x - 1 \quad \Rightarrow \quad du = \sec^2 x\,dx\)</div>
+      <div class="explica">
+        Derivamos: \(\frac{d}{dx}\tan x = \sec^2 x\) y \(\frac{d}{dx}(-1) = 0\). Por eso \(\sec^2 x\,dx\) se convierte
+        exactamente en \(du\), sin factor adicional.
+      </div>
+    </div>
+
+    <div class="bloque-paso">
+      <div class="titulo-paso">Paso 3: Integrar en u</div>
+      <div>\(\int \frac{\sec^2 x}{\sqrt{\tan x - 1}}\,dx = \int u^{-1/2}\,du\)</div>
+      <div>\(= \frac{u^{1/2}}{\tfrac{1}{2}} + C = 2u^{1/2} + C\)</div>
+      <div class="explica">
+        Usamos \(\int u^n\,du = \frac{u^{n+1}}{n+1} + C\) con \(n = -\tfrac12\), así que \(n+1 = \tfrac12\).
+        Dividir entre \(\tfrac12\) equivale a multiplicar por 2.
+      </div>
+    </div>
+
+    <div class="bloque-paso">
+      <div class="titulo-paso">Paso 4: Volver a la variable x</div>
+      <div>\(\int \frac{dx}{\cos^2 x\sqrt{\tan x - 1}} = 2\sqrt{\tan x - 1} + C\)</div>
+    </div>
+
+    <div class="resultado-final">
+      <strong>Comprobación:</strong> \(\frac{d}{dx}\left(2\sqrt{\tan x - 1}\right) = \frac{1}{\sqrt{\tan x - 1}}\cdot\sec^2 x\) ✔
+    </div>
+  </div>
+</section>
+
+<footer>Módulo 10 · Cálculo Integral</footer>
+
+<script>
+  // ---------- Definición de funciones y antiderivadas ----------
+  // Cada entrada: f (función), F (antiderivada), latexF (texto LaTeX de F), latexF_def (nombre de la función)
+  const FUNCIONES = {
+    sen: {
+      f: x => Math.sin(x),
+      F: x => -Math.cos(x),
+      latexF: "-\\cos(x)",
+      latexFx: "f(x) = \\sin(x)"
+    },
+    cos: {
+      f: x => Math.cos(x),
+      F: x => Math.sin(x),
+      latexF: "\\sin(x)",
+      latexFx: "g(x) = \\cos(x)"
+    },
+    sen2: {
+      f: x => Math.sin(x) * Math.sin(x),
+      // ∫ sin²x dx = x/2 − sin(2x)/4
+      F: x => x / 2 - Math.sin(2 * x) / 4,
+      latexF: "\\frac{x}{2} - \\frac{\\sin(2x)}{4}",
+      latexFx: "h(x) = \\sin^2(x)"
+    },
+    tan: {
+      f: x => Math.tan(x),
+      // ∫ tan x dx = −ln|cos x|
+      F: x => -Math.log(Math.abs(Math.cos(x))),
+      latexF: "-\\ln|\\cos(x)|",
+      latexFx: "k(x) = \\tan(x)"
+    }
+  };
+
+  // Asíntotas de tan(x) en ±π/2 (y sus traslaciones por π)
+  function cruzaAsintota(a, b) {
+    const lo = Math.min(a, b), hi = Math.max(a, b);
+    const k = Math.ceil((lo - Math.PI / 2) / Math.PI);
+    const asintota = Math.PI / 2 + k * Math.PI;
+    return asintota > lo && asintota < hi;
+  }
+
+  // ---------- Elementos ----------
+  const selectFuncion = document.getElementById("select-funcion");
+  const sliderA = document.getElementById("slider-a");
+  const sliderB = document.getElementById("slider-b");
+  const valorA = document.getElementById("valor-a");
+  const valorB = document.getElementById("valor-b");
+  const aviso = document.getElementById("aviso");
+  const salidaAntiderivada = document.getElementById("salida-antiderivada");
+  const salidaIntegral = document.getElementById("salida-integral");
+  const areaNumerica = document.getElementById("area-numerica");
+
+  // ---------- Utilidades ----------
+  function tex(elemento, latex) {
+    if (window.katex) {
+      katex.render(latex, elemento, { throwOnError: false, displayMode: true });
+    } else {
+      elemento.textContent = latex;
+    }
+  }
+
+  function puntos(fn, desde, hasta, n = 300) {
+    const xs = [], ys = [];
+    for (let i = 0; i <= n; i++) {
+      const t = desde + (hasta - desde) * i / n;
+      xs.push(t);
+      ys.push(fn(t));
+    }
+    return { xs, ys };
+  }
+
+  const layoutBase = {
+    paper_bgcolor: "rgba(0,0,0,0)",
+    plot_bgcolor: "rgba(0,0,0,0)",
+    font: { color: "#ffffff" },
+    margin: { l: 55, r: 25, t: 20, b: 50 },
+    showlegend: false,
+    xaxis: { gridcolor: "rgba(255,255,255,0.12)", zerolinecolor: "rgba(255,255,255,0.4)" },
+    yaxis: { gridcolor: "rgba(255,255,255,0.12)", zerolinecolor: "rgba(255,255,255,0.4)" }
+  };
+  const config = { responsive: true, displayModeBar: false };
+
+  const formatoPi = t => {
+    // Muestra múltiplos de π de forma legible en los valores de los sliders
+    return t.toFixed(2);
+  };
+
+  // ---------- Dibujo y cálculos ----------
+  function actualizar() {
+    const clave = selectFuncion.value;
+    const { f, F, latexF, latexFx } = FUNCIONES[clave];
+
+    let a = parseFloat(sliderA.value);
+    let b = parseFloat(sliderB.value);
+
+    valorA.textContent = formatoPi(a);
+    valorB.textContent = formatoPi(b);
+
+    // Ordenar límites para dibujar; el signo se aplica al final
+    const inverso = a > b;
+    const lo = Math.min(a, b), hi = Math.max(a, b);
+
+    // Caso de discontinuidad en tan(x)
+    const esTan = clave === "tan";
+    const bloqueada = esTan && cruzaAsintota(lo, hi);
+
+    if (bloqueada) {
+      aviso.style.display = "block";
+      aviso.textContent = "El intervalo cruza una asíntota de tan(x) en π/2 o −π/2. La integral no existe en el sentido usual.";
+    } else if (inverso) {
+      aviso.style.display = "block";
+      aviso.textContent = "Nota: a > b. La integral cambia de signo; el área se dibuja sobre [b, a].";
+    } else {
+      aviso.style.display = "none";
+      aviso.textContent = "";
+    }
+
+    // Puntos de la curva, cortando tan(x) cerca de sus asíntotas para que no dibuje líneas verticales falsas
+    const yLimite = 6;
+    const curvaBase = puntos(f, -3.2, 3.2, 500);
+    if (esTan) {
+      curvaBase.ys = curvaBase.ys.map(y => (Math.abs(y) > yLimite ? null : y));
+    }
+
+    // Sombreado entre lo y hi
+    const sombra = puntos(f, lo, hi, 300);
+    if (esTan) {
+      sombra.ys = sombra.ys.map(y => (Math.abs(y) > yLimite ? null : y));
+    }
+
+    // Rango vertical según la función
+    const yRango = esTan ? [-yLimite, yLimite] : [-1.5, 1.5];
+
+    Plotly.react("grafica", [
+      { x: curvaBase.xs, y: curvaBase.ys, mode: "lines",
+        line: { color: "#ffffff", width: 2.5 }, hoverinfo: "skip", connectgaps: false },
+      { x: sombra.xs, y: sombra.ys, mode: "lines", fill: "tozeroy",
+        fillcolor: "rgba(0,229,255,0.45)", line: { color: "#00e5ff", width: 1.5 },
+        hoverinfo: "skip", connectgaps: false }
+    ], {
+      ...layoutBase,
+      xaxis: { ...layoutBase.xaxis, title: "x", range: [-3.3, 3.3] },
+      yaxis: { ...layoutBase.yaxis, title: "y", range: yRango },
+      shapes: [
+        { type: "line", x0: lo, x1: lo, y0: yRango[0], y1: yRango[1],
+          line: { color: "#ff3cac", dash: "dot", width: 1.5 } },
+        { type: "line", x0: hi, x1: hi, y0: yRango[0], y1: yRango[1],
+          line: { color: "#ff3cac", dash: "dot", width: 1.5 } }
+      ]
+    }, config);
+
+    // ---------- Antiderivada ----------
+    tex(salidaAntiderivada,
+      `\\int ${latexFx.replace("f(x) = ", "").replace("g(x) = ", "").replace("h(x) = ", "").replace("k(x) = ", "")}\\,dx
+       = ${latexF} + C`);
+
+    // ---------- Integral definida ----------
+    if (bloqueada) {
+      tex(salidaIntegral, `\\text{No definida (asíntota en el intervalo)}`);
+      areaNumerica.innerHTML =
+        `<span style="color:#ffd166">La integral definida no existe en este intervalo.</span>`;
+      return;
+    }
+
+    const valorF = F(hi) - F(lo);
+    const valorReal = inverso ? -valorF : valorF;
+
+    tex(salidaIntegral,
+      `\\int_{${a.toFixed(2)}}^{${b.toFixed(2)}} ${latexFx.split("= ")[1]}\\,dx
+       = \\left[${latexF}\\right]_{${a.toFixed(2)}}^{${b.toFixed(2)}}
+       = ${valorReal.toFixed(4)}`);
+
+    areaNumerica.innerHTML =
+      `Valor del área (integral definida): <strong>${valorReal.toFixed(4)}</strong>`;
+  }
+
+  // ---------- Arranque ----------
+  window.addEventListener("load", () => {
+    if (window.renderMathInElement) {
+      renderMathInElement(document.body, {
+        delimiters: [
+          { left: "\\(", right: "\\)", display: false },
+          { left: "\\[", right: "\\]", display: true }
+        ],
+        throwOnError: false
+      });
+    }
+
+    if (typeof Plotly === "undefined") {
+      document.getElementById("grafica").innerHTML =
+        '<p class="error-cdn">No se cargó Plotly. Revisa tu conexión a internet.</p>';
+    } else {
+      selectFuncion.addEventListener("change", actualizar);
+      sliderA.addEventListener("input", actualizar);
+      sliderB.addEventListener("input", actualizar);
+      actualizar();
+    }
+  });
+</script>
+
 </body>
 </html>
