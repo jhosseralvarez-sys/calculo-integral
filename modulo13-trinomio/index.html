@@ -1,23 +1,586 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Módulo 7 - Próximamente</title>
-    <style>
-        body { font-family: sans-serif; background: #1e3c72; color: white; display: flex; justify-content: center; align-items: center; min-height: 100vh; text-align: center; }
-        .container { padding: 40px; }
-        h1 { font-size: 3em; margin-bottom: 20px; }
-        p { font-size: 1.3em; margin-bottom: 30px; }
-        a { color: #ffd700; text-decoration: none; font-size: 1.2em; }
-        a:hover { text-decoration: underline; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Módulo 13: Integrales con Trinomio ax² + bx + c</title>
+
+<!-- KaTeX (CSS, núcleo y auto-render) -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+
+<!-- Plotly.js -->
+<script defer src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --azul-1: #0b1d3a;
+    --azul-2: #13315c;
+    --azul-3: #1e4a80;
+    --acento-azul: #4da3ff;
+    --acento-verde: #3ddc97;
+    --cian: #00e5ff;
+    --naranja: #ff9f1c;
+    --texto-suave: rgba(255, 255, 255, 0.78);
+    --vidrio: rgba(255, 255, 255, 0.08);
+    --vidrio-borde: rgba(255, 255, 255, 0.18);
+  }
+
+  body {
+    font-family: "Segoe UI", Roboto, Arial, sans-serif;
+    color: #ffffff;
+    background: linear-gradient(135deg, var(--azul-1) 0%, var(--azul-2) 50%, var(--azul-3) 100%);
+    background-attachment: fixed;
+    min-height: 100vh;
+    line-height: 1.6;
+    padding: 90px 20px 40px;
+  }
+
+  .btn-volver {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    z-index: 1000;
+    padding: 10px 18px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.12);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid var(--vidrio-borde);
+    color: #fff;
+    text-decoration: none;
+    font-weight: 600;
+  }
+  .btn-volver:hover { background: rgba(255, 255, 255, 0.22); }
+
+  header { text-align: center; margin-bottom: 40px; }
+  header h1 { font-size: 2.2rem; margin-bottom: 8px; }
+  header p { color: var(--texto-suave); }
+
+  .card {
+    max-width: 1100px;
+    margin: 0 auto 30px;
+    padding: 28px 32px;
+    background: var(--vidrio);
+    border: 1px solid var(--vidrio-borde);
+    border-radius: 20px;
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+  }
+  .card h2 {
+    font-size: 1.6rem;
+    margin-bottom: 14px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--vidrio-borde);
+  }
+  .card h3 { font-size: 1.2rem; margin: 22px 0 10px; color: var(--acento-azul); }
+  .card p { margin-bottom: 12px; color: var(--texto-suave); }
+  .card strong { color: #fff; }
+
+  .formula-destacada {
+    text-align: center;
+    background: rgba(0, 0, 0, 0.25);
+    border-radius: 14px;
+    padding: 16px;
+    margin: 14px 0;
+    overflow-x: auto;
+    font-size: 1.15rem;
+  }
+
+  .nota {
+    background: rgba(61, 220, 151, 0.12);
+    border-left: 4px solid var(--acento-verde);
+    padding: 12px 16px;
+    border-radius: 10px;
+    margin: 14px 0;
+    color: var(--texto-suave);
+  }
+
+  .controles {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 14px;
+    padding: 20px;
+    margin-bottom: 22px;
+  }
+  .control-fila {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 12px;
+  }
+  .control-fila label { min-width: 90px; font-weight: 600; font-size: 1.02rem; }
+  .control-fila input[type="range"] { flex: 1; min-width: 180px; accent-color: var(--cian); }
+  .valor {
+    font-family: Consolas, monospace;
+    background: rgba(255, 255, 255, 0.12);
+    padding: 4px 10px;
+    border-radius: 8px;
+    min-width: 70px;
+    text-align: center;
+  }
+
+  .graficas { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  .grafica-caja { background: rgba(0, 0, 0, 0.2); border-radius: 14px; padding: 10px; }
+  .grafica-caja h4 { text-align: center; margin: 6px 0 4px; font-size: 1.05rem; }
+  .grafica { width: 100%; height: 380px; }
+
+  .resultados {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+    margin-top: 22px;
+  }
+  .panel { background: rgba(0, 0, 0, 0.2); border-radius: 14px; padding: 18px; }
+  .panel h4 { margin-bottom: 10px; color: var(--acento-azul); }
+  .panel.cian h4 { color: var(--cian); }
+  .panel .salida { overflow-x: auto; font-size: 1.1rem; }
+
+  .aviso { color: #ffd166; font-size: 0.98rem; margin-top: 8px; }
+  .error-cdn { color: #ff8a8a; font-weight: 600; }
+
+  .ejemplo-titulo { font-size: 1.3rem; color: var(--acento-verde); margin-bottom: 12px; }
+  .bloque-paso {
+    background: rgba(0, 0, 0, 0.22);
+    border-radius: 14px;
+    padding: 16px 20px;
+    margin: 14px 0;
+    overflow-x: auto;
+  }
+  .bloque-paso .titulo-paso { font-weight: 700; color: var(--acento-azul); margin-bottom: 6px; }
+  .bloque-paso .explica { color: var(--texto-suave); font-size: 0.97rem; margin-top: 8px; }
+  .resultado-final {
+    text-align: center;
+    background: rgba(61, 220, 151, 0.15);
+    border: 1px solid rgba(61, 220, 151, 0.4);
+    border-radius: 14px;
+    padding: 16px;
+    margin-top: 16px;
+    font-size: 1.1rem;
+  }
+
+  footer { text-align: center; color: var(--texto-suave); font-size: 0.9rem; margin-top: 20px; }
+
+  @media (max-width: 800px) {
+    .graficas, .resultados { grid-template-columns: 1fr; }
+    .grafica { height: 300px; }
+    header h1 { font-size: 1.7rem; }
+    .card { padding: 20px; }
+    .control-fila label { min-width: 100%; }
+    body { padding: 80px 12px 30px; }
+  }
+</style>
 </head>
 <body>
-    <div class="container">
-        <h1>🚧 Próximamente</h1>
-        <p>Este módulo estará disponible en la <strong>Fase 2</strong> del proyecto.</p>
-        <a href="../index.html">← Volver al menú principal</a>
+
+<a href="../index.html" class="btn-volver">← Volver al menú</a>
+
+<header>
+  <h1>Módulo 13: Integrales con Trinomio ax² + bx + c</h1>
+  <p>Teoría, laboratorio interactivo y ejemplos resueltos</p>
+</header>
+
+<!-- ================= SECCIÓN 1: TEORÍA ================= -->
+<section class="card" id="seccion-teoria">
+  <h2>Sección 1: Teoría y Estrategia (Completar el Cuadrado)</h2>
+
+  <p>
+    Cuando el denominador (o lo que está bajo la raíz) es un trinomio cuadrático \(ax^2 + bx + c\), la integral
+    no se reconoce de inmediato en una tabla. La estrategia es <strong>completar el cuadrado</strong>, es decir,
+    reescribir el trinomio en la forma:
+  </p>
+
+  <div class="formula-destacada">
+    \(ax^2 + bx + c = a(x-h)^2 + k\)
+  </div>
+
+  <p>
+    donde \((h, k)\) es el <strong>vértice</strong> de la parábola \(y = ax^2 + bx + c\). Sus coordenadas se calculan así:
+  </p>
+
+  <div class="formula-destacada">
+    \(h = -\frac{b}{2a} \qquad\qquad k = c - \frac{b^2}{4a}\)
+  </div>
+
+  <p>
+    La fórmula de \(k\) sale de desarrollar \(a(x-h)^2 + k\) y comparar coeficientes: el término constante de
+    \(a(x-h)^2\) es \(ah^2\), así que \(c = ah^2 + k\), y al despejar con \(h = -\frac{b}{2a}\) se obtiene \(k = c - \frac{b^2}{4a}\).
+  </p>
+
+  <h3>¿Qué integral resulta?</h3>
+  <p>
+    Después de completar el cuadrado y hacer la sustitución \(u = x - h\), el denominador queda en una de estas formas,
+    según los signos de \(a\) y \(k\):
+  </p>
+  <ul style="margin: 0 0 12px 22px; color: var(--texto-suave);">
+    <li>Si el trinomio aparece como \(\sqrt{u^2 + m}\) (con \(a > 0\), \(k > 0\)) o \(\sqrt{u^2 - m}\) (con \(a > 0\), \(k < 0\)): el resultado es un <strong>logaritmo</strong>, como vimos en las funciones hiperbólicas inversas.</li>
+    <li>Si el trinomio aparece como \(\sqrt{m - u^2}\) (con \(a < 0\), \(k > 0\)): el resultado es un <strong>arcoseno</strong>.</li>
+    <li>Si el trinomio está en el denominador sin raíz, \(\frac{1}{u^2 + m}\) con \(m > 0\): el resultado es un <strong>arcotangente</strong>.</li>
+  </ul>
+
+  <div class="nota">
+    <strong>Regla práctica:</strong> observa el signo de \(a\) (si la parábola abre hacia arriba o hacia abajo)
+    y el signo de \(k\) (si el vértice queda por encima o por debajo del eje \(x\), en la forma completada).
+    Con esos dos signos decides la fórmula a usar.
+  </div>
+</section>
+
+<!-- ================= SECCIÓN 2: LABORATORIO ================= -->
+<section class="card" id="seccion-laboratorio">
+  <h2>Sección 2: Laboratorio Interactivo</h2>
+
+  <p>
+    Mueve los coeficientes y observa cómo el vértice \((h, k)\) se mueve en la gráfica. En la gráfica de la
+    izquierda, la parábola original (blanca) y su forma completada (cian punteada) coinciden exactamente. En la gráfica
+    de la derecha, el vértice se traslada al origen: esa es la <strong>traslación</strong> que hace posible la integral.
+  </p>
+
+  <div class="controles">
+    <div class="control-fila">
+      <label for="slider-a">a =</label>
+      <input type="range" id="slider-a" min="-2" max="2" step="0.1" value="1">
+      <span class="valor" id="valor-a">1.0</span>
     </div>
+    <div class="control-fila">
+      <label for="slider-b">b =</label>
+      <input type="range" id="slider-b" min="-5" max="5" step="0.1" value="-2">
+      <span class="valor" id="valor-b">-2.0</span>
+    </div>
+    <div class="control-fila">
+      <label for="slider-c">c =</label>
+      <input type="range" id="slider-c" min="-5" max="5" step="0.1" value="3">
+      <span class="valor" id="valor-c">3.0</span>
+    </div>
+    <p class="aviso" id="aviso" style="display:none;"></p>
+  </div>
+
+  <div class="graficas">
+    <div class="grafica-caja">
+      <h4>Parábola original y forma completada</h4>
+      <div id="grafica-original" class="grafica"></div>
+    </div>
+    <div class="grafica-caja">
+      <h4>Coordenadas desplazadas (vértice en el origen)</h4>
+      <div id="grafica-desplazada" class="grafica"></div>
+    </div>
+  </div>
+
+  <div class="resultados">
+    <div class="panel">
+      <h4>Vértice (h, k)</h4>
+      <div class="salida" id="salida-hk"></div>
+    </div>
+    <div class="panel cian">
+      <h4>Forma completada</h4>
+      <div class="salida" id="salida-forma"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= SECCIÓN 3: EJEMPLOS ================= -->
+<section class="card" id="seccion-ejemplos">
+  <h2>Sección 3: Ejemplos Resueltos Paso a Paso</h2>
+
+  <!-- EJEMPLO 1 -->
+  <div id="ejemplo-1">
+    <h3 class="ejemplo-titulo">Ejemplo 1: \(\int \frac{2x+3}{\sqrt{9x^2-12x+8}}\,dx\)</h3>
+
+    <div class="bloque-paso">
+      <div class="titulo-paso">Paso 1: Completar el cuadrado en el denominador</div>
+      <div>\(9x^2 - 12x + 8 = (3x-2)^2 + 4\)</div>
+      <div class="explica">
+        Factorizamos el 9 en los dos primeros términos: \(9\left(x^2 - \tfrac{4}{3}x\right) + 8\). Tomamos la mitad
+        de \(-\tfrac43\), que es \(-\tfrac23\), y la elevamos al cuadrado: \(\tfrac49\). Sumamos y restamos dentro del
+        paréntesis: \(9\left[\left(x-\tfrac23\right)^2 - \tfrac49\right] + 8 = 9\left(x-\tfrac23\right)^2 - 4 + 8 = (3x-2)^2 + 4\).
+        Aquí \(a = 9\), \(h = \tfrac{2}{3}\) y \(k = 4\) en la forma \(a(x-h)^2 + k\), pero para la integral conviene la forma \((3x-2)^2 + 4\).
+      </div>
+    </div>
+
+    <div class="bloque-paso">
+      <div class="titulo-paso">Paso 2: Ajustar el numerador a la derivada del trinomio</div>
+      <div>\(\frac{d}{dx}\left(9x^2-12x+8\right) = 18x - 12 = 6(3x-2)\)</div>
+      <div>\(2x + 3 = \frac{1}{9}(18x - 12) + \frac{13}{3}\)</div>
+      <div class="explica">
+        Escribimos \(2x + 3\) como combinación de la derivada \(18x - 12\). El factor \(\frac19\) sale de dividir
+        \(2x\) entre \(18x\)'s coeficiente: \(\frac{2}{18} = \frac19\). Al multiplicar: \(\frac19(18x - 12) = 2x - \frac{4}{3}\).
+        Para llegar a \(2x + 3\) sumamos \(\frac{13}{3}\), porque \(3 - \left(-\frac43\right) = \frac{9}{3} + \frac{4}{3} = \frac{13}{3}\).
+      </div>
+    </div>
+
+    <div class="bloque-paso">
+      <div class="titulo-paso">Paso 3: Separar la integral en dos</div>
+      <div>\(\int \frac{2x+3}{\sqrt{9x^2-12x+8}}\,dx = \frac{1}{9}\int \frac{18x-12}{\sqrt{9x^2-12x+8}}\,dx + \frac{13}{3}\int \frac{dx}{\sqrt{9x^2-12x+8}}\)</div>
+    </div>
+
+    <div class="bloque-paso">
+      <div class="titulo-paso">Paso 4: Primera integral (sustitución simple)</div>
+      <div>\(u = 9x^2 - 12x + 8 \quad \Rightarrow \quad du = (18x - 12)\,dx\)</div>
+      <div>\(\frac{1}{9}\int \frac{du}{\sqrt{u}} = \frac{1}{9}\cdot 2\sqrt{u} = \frac{2}{9}\sqrt{9x^2-12x+8}\)</div>
+      <div class="explica">
+        La derivada del interior de la raíz es exactamente \(18x - 12\), así que el integrando tiene la forma \(\frac{du}{\sqrt{u}}\).
+        Usamos \(\int u^{-1/2}\,du = 2u^{1/2}\), que es la fórmula \(\frac{u^{n+1}}{n+1}\) con \(n+1 = \tfrac12\).
+      </div>
+    </div>
+
+    <div class="bloque-paso">
+      <div class="titulo-paso">Paso 5: Segunda integral (fórmula logarítmica)</div>
+      <div>\(t = 3x - 2 \quad \Rightarrow \quad dt = 3\,dx \quad \Rightarrow \quad dx = \frac{dt}{3}\)</div>
+      <div>\(\frac{13}{3}\int \frac{dx}{\sqrt{(3x-2)^2+4}} = \frac{13}{3}\cdot\frac{1}{3}\int \frac{dt}{\sqrt{t^2+4}} = \frac{13}{9}\ln\left(t + \sqrt{t^2+4}\right) + C\)</div>
+      <div class="explica">
+        El \(\frac{1}{3}\) viene de \(dx = \frac{dt}{3}\), porque \(dt = 3\,dx\). Como \(t^2 + 4 = 4\cdot\text{(algo)}\) no
+        aplica, usamos la fórmula de la suma \(\int \frac{dt}{\sqrt{t^2+a^2}} = \ln\left(t+\sqrt{t^2+a^2}\right)+C\) con \(a^2 = 4\).
+        Multiplicamos \(\frac{13}{3}\cdot\frac{1}{3} = \frac{13}{9}\).
+      </div>
+    </div>
+
+    <div class="bloque-paso">
+      <div class="titulo-paso">Paso 6: Resultado final</div>
+      <div>\(\int \frac{2x+3}{\sqrt{9x^2-12x+8}}\,dx = \frac{2}{9}\sqrt{9x^2-12x+8} + \frac{13}{9}\ln\left(3x-2+\sqrt{9x^2-12x+8}\right) + C\)</div>
+    </div>
+
+    <div class="resultado-final">
+      <strong>Comprobación parcial:</strong> \(\frac{d}{dx}\frac{2}{9}\sqrt{9x^2-12x+8} = \frac{2}{9}\cdot\frac{18x-12}{2\sqrt{9x^2-12x+8}} = \frac{2x - \tfrac43}{\sqrt{9x^2-12x+8}}\), y la suma con la segunda parte reproduce \(\frac{2x+3}{\sqrt{9x^2-12x+8}}\) ✔
+    </div>
+  </div>
+
+  <!-- EJEMPLO 2 -->
+  <div id="ejemplo-2" style="margin-top: 40px;">
+    <h3 class="ejemplo-titulo">Ejemplo 2: \(\int \frac{x+2}{\sqrt{4x-x^2}}\,dx\)</h3>
+
+    <div class="bloque-paso">
+      <div class="titulo-paso">Paso 1: Completar el cuadrado</div>
+      <div>\(4x - x^2 = -(x^2 - 4x) = -\left[(x-2)^2 - 4\right] = 4 - (x-2)^2\)</div>
+      <div class="explica">
+        Sacamos el signo menos como factor común. Dentro del paréntesis, \(x^2 - 4x\) con mitad de \(-4\) igual a \(-2\)
+        y cuadrado \(4\): \(x^2 - 4x = (x-2)^2 - 4\). Al distribuir el menos, \(-(-4) = +4\). Así \(a = -1\), \(h = 2\), \(k = 4\).
+      </div>
+    </div>
+
+    <div class="bloque-paso">
+      <div class="titulo-paso">Paso 2: Ajustar el numerador a la derivada del interior</div>
+      <div>\(\frac{d}{dx}\left(4x - x^2\right) = 4 - 2x = -2(x-2)\)</div>
+      <div>\(x + 2 = -\frac{1}{2}(4 - 2x) + 4\)</div>
+      <div class="explica">
+        Buscamos \(x + 2\) como combinación de \(4 - 2x\). Al multiplicar \(-\tfrac12\) por \(4 - 2x\) obtenemos \(x - 2\),
+        y para llegar a \(x + 2\) sumamos 4, porque \((x+2) - (x-2) = 4\).
+      </div>
+    </div>
+
+    <div class="bloque-paso">
+      <div class="titulo-paso">Paso 3: Separar la integral en dos</div>
+      <div>\(\int \frac{x+2}{\sqrt{4x-x^2}}\,dx = -\frac{1}{2}\int \frac{4-2x}{\sqrt{4x-x^2}}\,dx + 4\int \frac{dx}{\sqrt{4x-x^2}}\)</div>
+    </div>
+
+    <div class="bloque-paso">
+      <div class="titulo-paso">Paso 4: Primera integral (parte algebraica)</div>
+      <div>\(u = 4x - x^2 \quad \Rightarrow \quad du = (4-2x)\,dx\)</div>
+      <div>\(-\frac{1}{2}\int \frac{du}{\sqrt{u}} = -\frac{1}{2}\cdot 2\sqrt{u} = -\sqrt{4x-x^2}\)</div>
+      <div class="explica">
+        El \(-\frac12\) de la separación cancela el 2 de \(\int u^{-1/2}\,du = 2u^{1/2}\), así que queda \(-\sqrt{4x-x^2}\).
+      </div>
+    </div>
+
+    <div class="bloque-paso">
+      <div class="titulo-paso">Paso 5: Segunda integral (arcoseno)</div>
+      <div>\(4\int \frac{dx}{\sqrt{4-(x-2)^2}}\)</div>
+      <div>\(u = \frac{x-2}{2} \quad \Rightarrow \quad dx = 2\,du, \qquad \sqrt{4-(x-2)^2} = 2\sqrt{1-u^2}\)</div>
+      <div>\(4\int \frac{2\,du}{2\sqrt{1-u^2}} = 4\int \frac{du}{\sqrt{1-u^2}} = 4\arcsin u + C\)</div>
+      <div class="explica">
+        El factor 2 de \(dx = 2\,du\) se cancela con el 2 de \(\sqrt{4-(x-2)^2} = 2\sqrt{1-u^2}\), y queda la fórmula
+        \(\int \frac{du}{\sqrt{1-u^2}} = \arcsin u + C\).
+      </div>
+    </div>
+
+    <div class="bloque-paso">
+      <div class="titulo-paso">Paso 6: Resultado final</div>
+      <div>\(\int \frac{x+2}{\sqrt{4x-x^2}}\,dx = -\sqrt{4x-x^2} + 4\arcsin\left(\frac{x-2}{2}\right) + C\)</div>
+    </div>
+
+    <div class="resultado-final">
+      <strong>Comprobación:</strong> \(\frac{d}{dx}\left(-\sqrt{4x-x^2}\right) = \frac{x-2}{\sqrt{4x-x^2}}\) y \(\frac{d}{dx}\left(4\arcsin\tfrac{x-2}{2}\right) = \frac{4}{\sqrt{4x-x^2}}\). La suma es \(\frac{x+2}{\sqrt{4x-x^2}}\) ✔
+    </div>
+  </div>
+</section>
+
+<footer>Módulo 13 · Cálculo Integral</footer>
+
+<script>
+  // ---------- Elementos ----------
+  const sliderA = document.getElementById("slider-a");
+  const sliderB = document.getElementById("slider-b");
+  const sliderC = document.getElementById("slider-c");
+  const valorA = document.getElementById("valor-a");
+  const valorB = document.getElementById("valor-b");
+  const valorC = document.getElementById("valor-c");
+  const aviso = document.getElementById("aviso");
+  const salidaHK = document.getElementById("salida-hk");
+  const salidaForma = document.getElementById("salida-forma");
+
+  // Recuerda el signo de a para saber hacia dónde saltar si el slider llega a 0
+  let ultimoSigno = 1;
+
+  // ---------- Utilidades ----------
+  function tex(elemento, latex) {
+    if (window.katex) {
+      katex.render(latex, elemento, { throwOnError: false, displayMode: true });
+    } else {
+      elemento.textContent = latex;
+    }
+  }
+
+  // Número entre paréntesis si es negativo, para LaTeX
+  const par = v => (v < 0 ? `(${v.toFixed(2)})` : v.toFixed(2));
+
+  // Signo + o − seguido del valor absoluto
+  const signado = (v, sufijo = "") =>
+    v >= 0 ? `+ ${v.toFixed(2)}${sufijo}` : `- ${Math.abs(v).toFixed(2)}${sufijo}`;
+
+  function linspace(desde, hasta, n) {
+    const arr = [];
+    for (let i = 0; i <= n; i++) arr.push(desde + (hasta - desde) * i / n);
+    return arr;
+  }
+
+  const layoutBase = {
+    paper_bgcolor: "rgba(0,0,0,0)",
+    plot_bgcolor: "rgba(0,0,0,0)",
+    font: { color: "#ffffff" },
+    margin: { l: 55, r: 25, t: 20, b: 50 },
+    showlegend: false,
+    xaxis: { gridcolor: "rgba(255,255,255,0.12)", zerolinecolor: "rgba(255,255,255,0.4)" },
+    yaxis: { gridcolor: "rgba(255,255,255,0.12)", zerolinecolor: "rgba(255,255,255,0.4)" }
+  };
+  const config = { responsive: true, displayModeBar: false };
+
+  // Rango vertical acotado para que la parábola no se salga de la gráfica
+  function rangoY(valores) {
+    const finitos = valores.filter(Number.isFinite);
+    let yMin = Math.max(Math.min(...finitos), -20);
+    let yMax = Math.min(Math.max(...finitos), 20);
+    if (yMax - yMin < 1) { yMin -= 1; yMax += 1; }
+    const pad = (yMax - yMin) * 0.1;
+    return [yMin - pad, yMax + pad];
+  }
+
+  // ---------- Dibujo y cálculos ----------
+  function actualizar() {
+    // a no puede ser 0: si el slider llega a 0, se usa ±0.1 según el lado de donde venías
+    let a = Math.round(parseFloat(sliderA.value) * 10) / 10;
+    const b = Math.round(parseFloat(sliderB.value) * 10) / 10;
+    const c = Math.round(parseFloat(sliderC.value) * 10) / 10;
+
+    aviso.style.display = "none";
+    aviso.textContent = "";
+
+    if (Math.abs(a) < 0.05) {
+      a = 0.1 * ultimoSigno;
+      sliderA.value = a.toFixed(1);
+      aviso.style.display = "block";
+      aviso.textContent = `a no puede ser 0 (no sería una parábola). Se usa a = ${a.toFixed(1)}.`;
+    } else {
+      ultimoSigno = Math.sign(a);
+    }
+
+    valorA.textContent = a.toFixed(1);
+    valorB.textContent = b.toFixed(1);
+    valorC.textContent = c.toFixed(1);
+
+    // ----- Fórmulas del vértice -----
+    const h = -b / (2 * a);
+    const k = c - (b * b) / (4 * a);
+
+    // ----- Gráfica 1: original y forma completada (se superponen) -----
+    const xs = linspace(-6, 6, 300);
+    const yOriginal = xs.map(x => a * x * x + b * x + c);
+    const yCompletada = xs.map(x => a * (x - h) * (x - h) + k);
+    const rango1 = rangoY([...yOriginal, k]);
+
+    Plotly.react("grafica-original", [
+      { x: xs, y: yOriginal, mode: "lines", line: { color: "#ffffff", width: 2.5 }, hoverinfo: "skip" },
+      { x: xs, y: yCompletada, mode: "lines", line: { color: "#00e5ff", width: 2, dash: "dot" }, hoverinfo: "skip" },
+      { x: [h], y: [k], mode: "markers",
+        marker: { color: "#ff9f1c", size: 12, line: { color: "#ffffff", width: 1 } }, hoverinfo: "skip" }
+    ], {
+      ...layoutBase,
+      xaxis: { ...layoutBase.xaxis, title: "x", range: [-6, 6] },
+      yaxis: { ...layoutBase.yaxis, title: "y", range: rango1 },
+      shapes: [
+        { type: "line", x0: h, x1: h, y0: rango1[0], y1: rango1[1],
+          line: { color: "#ff9f1c", dash: "dot", width: 1.2 } },
+        { type: "line", x0: -6, x1: 6, y0: 0, y1: 0,
+          line: { color: "rgba(255,255,255,0.35)", width: 1 } }
+      ]
+    }, config);
+
+    // ----- Gráfica 2: coordenadas desplazadas (X = x − h, Y = y − k) -----
+    // En estas coordenadas la parábola es Y = a X², con el vértice en el origen
+    const X = xs.map(x => x - h);
+    const Y = X.map(t => a * t * t);
+    const rango2 = rangoY([...Y, 0]);
+
+    Plotly.react("grafica-desplazada", [
+      { x: X, y: Y, mode: "lines", line: { color: "#ffffff", width: 2.5 }, hoverinfo: "skip" },
+      { x: [0], y: [0], mode: "markers",
+        marker: { color: "#ff9f1c", size: 12, line: { color: "#ffffff", width: 1 } }, hoverinfo: "skip" }
+    ], {
+      ...layoutBase,
+      xaxis: { ...layoutBase.xaxis, title: "X = x − h", range: [-6, 6], zeroline: true },
+      yaxis: { ...layoutBase.yaxis, title: "Y = y − k", range: rango2 },
+      shapes: [
+        { type: "line", x0: 0, x1: 0, y0: rango2[0], y1: rango2[1],
+          line: { color: "rgba(255,255,255,0.35)", width: 1 } },
+        { type: "line", x0: -6, x1: 6, y0: 0, y1: 0,
+          line: { color: "rgba(255,255,255,0.35)", width: 1 } }
+      ]
+    }, config);
+
+    // ----- Panel: valores de h y k -----
+    tex(salidaHK,
+      `h = -\\frac{b}{2a} = -\\frac{${par(b)}}{2 \\cdot ${par(a)}} = ${h.toFixed(3)}`);
+    tex(salidaHK,
+      `h = -\\frac{b}{2a} = -\\frac{${par(b)}}{2 \\cdot ${par(a)}} = ${h.toFixed(3)}
+       \\\\[8pt]
+       k = c - \\frac{b^2}{4a} = ${par(c)} - \\frac{${par(b)}^2}{4 \\cdot ${par(a)}} = ${k.toFixed(3)}`);
+
+    // ----- Panel: forma completada -----
+    const signoH = h >= 0 ? "-" : "+";
+    const signoK = k >= 0 ? "+" : "-";
+    tex(salidaForma,
+      `y = ${par(a)}x^2 ${signado(b, "x")} ${signado(c)}
+       \\\\[8pt]
+       \\downarrow
+       \\\\[8pt]
+       y = ${par(a)}\\left(x ${signoH} ${Math.abs(h).toFixed(3)}\\right)^2 ${signoK} ${Math.abs(k).toFixed(3)}`);
+  }
+
+  // ---------- Arranque ----------
+  window.addEventListener("load", () => {
+    if (window.renderMathInElement) {
+      renderMathInElement(document.body, {
+        delimiters: [
+          { left: "\\(", right: "\\)", display: false },
+          { left: "\\[", right: "\\]", display: true }
+        ],
+        throwOnError: false
+      });
+    }
+
+    if (typeof Plotly === "undefined") {
+      const msg = '<p class="error-cdn">No se cargó Plotly. Revisa tu conexión a internet.</p>';
+      document.getElementById("grafica-original").innerHTML = msg;
+      document.getElementById("grafica-desplazada").innerHTML = msg;
+    } else {
+      sliderA.addEventListener("input", actualizar);
+      sliderB.addEventListener("input", actualizar);
+      sliderC.addEventListener("input", actualizar);
+      actualizar();
+    }
+  });
+</script>
+
 </body>
 </html>
